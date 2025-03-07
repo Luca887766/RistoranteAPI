@@ -1,0 +1,143 @@
+body {
+    padding-top: 4rem;
+}
+
+.BarraOrizzontale {
+    background-color: #270514 !important;
+}
+
+#contenuto {
+    display: block;
+    padding: 0;
+}
+
+/* Slider styles */
+.slider {
+    position: relative;
+    width: 100%;
+    height: 100vh;
+    overflow: hidden;
+}
+
+.slides {
+    display: flex;
+    transition: transform 0.5s ease-in-out;
+    height: 100%;
+}
+
+.slide {
+    min-width: 100vw;
+    height: 100%;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: left;
+    position: relative;
+    flex-direction: column;
+}
+
+.slide::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+    background-position: center;
+    filter: blur(1rem);
+    z-index: -1;
+    pointer-events: none;
+}
+
+.text-content {
+    max-width: 40rem;
+    backdrop-filter: blur(1rem);
+    padding: 2rem;
+    background-color: rgba(255, 255, 255, 0.8);
+    text-align: left;
+    border-radius: 1rem;
+}
+
+.text-content h2 {
+    color: #270514;
+    margin-bottom: 1rem;
+}
+
+.text-content p {
+    color: #333;
+}
+
+.slider-buttons {
+    position: absolute;
+    top: 50%;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    transform: translateY(-50%);
+}
+
+.slider-button {
+    background-color: rgba(0, 0, 0, 0.5);
+    border: none;
+    color: white;
+    width: 5rem;
+    height: 5rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3rem;
+}
+
+@media (min-width: 30rem) {
+    .slide {
+        flex-direction: row;
+    }
+}
+
+/* Media Queries */
+@media (max-width: 120rem) {
+    .text-content {
+        max-width: 35rem;
+    }
+}
+
+@media (max-width: 99.2rem) {
+    .text-content {
+        max-width: 30rem;
+    }
+}
+
+@media (max-width: 76.8rem) {
+    .text-content {
+        max-width: 25rem;
+    }
+}
+
+@media (max-width: 57.6rem) {
+    .text-content {
+        max-width: 20rem;
+        padding: 1.5rem;
+    }
+
+    .slider-button {
+        width: 4rem;
+        height: 4rem;
+        font-size: 2.5rem;
+    }
+}
+
+@media (max-width: 48rem) {
+    .text-content {
+        max-width: 18rem;
+        padding: 1rem;
+    }
+
+    .slider-button {
+        width: 3rem;
+        height: 3rem;
+        font-size: 2rem;
+    }
+}

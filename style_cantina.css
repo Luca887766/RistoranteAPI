@@ -1,0 +1,165 @@
+body {
+    padding-top: 4rem;
+}
+
+.BarraOrizzontale {
+    background-color: #270514 !important;
+}
+
+#contenuto {
+    padding: 0;
+}
+
+div.sezione {
+    width: 100%;
+    height: 100vh;
+    background-size: cover;
+    background-position: center;
+    margin: 0;
+    padding: 10vw;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+div.contenuto {
+    height: auto;
+    width: 100%;
+    display: flex;
+    align-items: stretch;
+    justify-content: space-between;
+    border-radius: 1rem;
+    box-shadow: 0 0 2rem rgba(139, 139, 139, 0.2);
+    overflow: hidden;
+    flex-direction: row;
+}
+
+div.image {
+    width: 50%;
+    height: auto;
+    display: block;
+    overflow: hidden;
+    flex: 1;
+}
+
+.image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    margin: auto;
+}
+
+div.cella {
+    min-height: 50vh;
+    height: 100%;
+    width: 50%;
+    padding: 2rem;
+    color: white;
+    background-color: rgba(31, 31, 31, 0.7);
+    backdrop-filter: blur(0.4rem);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    flex: 1;
+}
+
+div.cella .map {
+    height: 40vh;
+    flex-grow: 1;
+    margin-top: 1rem;
+    border-radius: 0.5rem;
+    overflow: hidden;
+    position: relative;
+}
+div.cella .map {
+    height: 100%;
+    flex-grow: 1;
+    margin-top: 1rem;
+    border-radius: 0.5rem;
+    overflow: hidden;
+    position: relative;
+}
+
+div.cella p {
+    text-align: justify;
+    letter-spacing: 0.1rem;
+    margin: 1rem 0;
+}
+
+div.cella h1 {
+    text-align: left;
+    font-size: 2.5rem;
+    margin-top: 0;
+    margin-bottom: 1rem;
+    letter-spacing: 0.3rem;
+    position: relative;
+}
+
+div.cella .map {
+    height: 100%;
+    flex-grow: 1;
+    margin-top: 1rem;
+    border-radius: 0.5rem;
+    overflow: hidden;
+    position: relative;
+}
+
+div.barriera {
+    clear: both;
+    height: 3rem;
+    background: #5c5c5c42;
+}
+
+iframe.pos {
+    width: 100%;
+    height: 100%;
+    border: none;
+    border-radius: 0.5rem;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+@media (max-width: 48rem) {
+    div.contenuto {
+        display: flex;
+        flex-direction: column;
+        height: auto;
+        width: 100%;
+        border-radius: 0;
+    }
+
+    div.image{
+        width: 100%;
+        height: 50vh;
+    }
+
+    div.sezione {
+        height: auto;
+    }
+
+    div.cella {
+        width: 100%;
+        height: auto;
+        padding: 1rem;
+    }
+
+    div.cella h1 {
+        font-size: 2rem;
+    }
+
+    div.cella p {
+        font-size: 1rem;
+    }
+
+    div.cella .map {
+        height: 20rem;
+    }
+
+    body {
+        padding-top: 7rem;
+    }
+}

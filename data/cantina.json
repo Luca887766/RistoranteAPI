@@ -1,0 +1,34 @@
+[
+    {
+        "nome": "Sassicaia",
+        "anno": 2015,
+        "descrizione": "Un vino rosso pregiato con note di frutti di bosco e spezie.",
+        "luogo": "Bolgheri, Italia",
+        "prezzo": 570.00,
+        "img": "img/cantina/sassicaia.webp"
+    },
+    {
+        "nome": "Tignanello",
+        "anno": 2016,
+        "descrizione": "Un vino elegante con aromi di ciliegia, vaniglia e tabacco.",
+        "luogo": "San Casciano in Val di Pesa, Italia",
+        "prezzo": 200.00,
+        "img": "img/cantina/tignanello.jpg"
+    },
+    {
+        "nome": "Masseto",
+        "anno": 2014,
+        "descrizione": "Un vino robusto con sapori di prugna, cioccolato e spezie.",
+        "luogo": "Bolgheri, Italia",
+        "prezzo": 700.00,
+        "img": "img/cantina/masseto.jpg"
+    },
+    {
+        "nome": "Brunello di Montalcino",
+        "anno": 2012,
+        "descrizione": "Un vino complesso con aromi di frutti di bosco, tabacco e cuoio.",
+        "luogo": "Montalcino, Italia",
+        "prezzo": 250.00,
+        "img": "img/cantina/brunello_di_montalcino.jpg"
+    }
+]

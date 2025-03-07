@@ -1,0 +1,20 @@
+{
+  "social": {
+    "facebook": {
+      "url": "https://facebook.com/IlGustoDelleStelle",
+      "icon": "img/facebook.png"
+    },
+    "instagram": {
+      "url": "https://instagram.com/IlGustoDelleStelle",
+      "icon": "img/instagram.png"
+    },
+    "twitter": {
+      "url": "https://twitter.com/IlGustoDelleStelle",
+      "icon": "img/twitter.png"
+    },
+    "youtube": {
+      "url": "https://youtube.com/IlGustoDelleStelle",
+      "icon": "img/youtube.png"
+    }
+  }
+}

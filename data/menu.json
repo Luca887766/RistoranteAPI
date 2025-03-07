@@ -1,0 +1,116 @@
+{
+  "menù": {
+    "lunedì": {
+      "piatti": [
+        {
+          "nome": "Carpaccio di Manzo Affumicato",
+          "descrizione": "Con rucola selvatica, scaglie di parmigiano e riduzione di aceto balsamico al miele.",
+          "immagine": "./img/menu/lunedì/p1.jpg",
+          "prezzo": "85€"
+        },
+        {
+          "nome": "Tortelli di Ricotta e Spinaci",
+          "descrizione": "Con burro di salvia e una spolverata di mandorle tostate.",
+          "immagine": "./img/menu/lunedì/p2.jpg",
+          "prezzo": "75€"
+        }
+      ]
+    },
+    "martedì": {
+      "piatti": [
+        {
+          "nome": "Risotto ai Funghi Porcini",
+          "descrizione": "Con burro, parmigiano e prezzemolo fresco.",
+          "immagine": "./img/menu/martedì/p1.jpg",
+          "prezzo": "80€"
+        },
+        {
+          "nome": "Tagliata di Manzo",
+          "descrizione": "Con rucola, pomodorini e scaglie di parmigiano.",
+          "immagine": "./img/menu/martedì/p2.jpg",
+          "prezzo": "95€"
+        }
+      ]
+    },
+    "mercoledì": {
+      "piatti": [
+        {
+          "nome": "Spaghetti alla Carbonara",
+          "descrizione": "Con guanciale, uova, pecorino e pepe nero.",
+          "immagine": "./img/menu/mercoledì/p1.jpg",
+          "prezzo": "85€"
+        },
+        {
+          "nome": "Costata di Maiale Iberico",
+          "descrizione": "Marinata agli agrumi, cotta a bassa temperatura e servita con purea di patate dolci.",
+          "immagine": "./img/menu/mercoledì/p2.jpg",
+          "prezzo": "120€"
+        }
+      ]
+    },
+    "giovedì": {
+      "piatti": [
+        {
+          "nome": "Lasagna alla Bolognese",
+          "descrizione": "Con ragù di carne, besciamella e formaggio grattugiato.",
+          "immagine": "./img/menu/giovedì/p1.jpg",
+          "prezzo": "95€"
+        },
+        {
+          "nome": "Risotto al Barolo e Radicchio",
+          "descrizione": "Con scaglie di formaggio Castelmagno.",
+          "immagine": "./img/menu/giovedì/p2.jpg",
+          "prezzo": "105€"
+        }
+      ]
+    },
+    "venerdì": {
+      "piatti": [
+        {
+          "nome": "Baccalà Mantecato",
+          "descrizione": "Con crostone di polenta grigliata.",
+          "immagine": "./img/menu/venerdì/p1.jpg",
+          "prezzo": "120€"
+        },
+        {
+          "nome": "Tortino al Cioccolato Fondente",
+          "descrizione": "Con cuore caldo e gelato al lampone.",
+          "immagine": "./img/menu/venerdì/p2.jpg",
+          "prezzo": "110€"
+        }
+      ]
+    },
+    "sabato": {
+      "piatti": [
+        {
+          "nome": "Carpaccio di Tonno",
+          "descrizione": "Con salsa di soia e agrumi.",
+          "immagine": "./img/menu/sabato/p1.jpg",
+          "prezzo": "125€"
+        },
+        {
+          "nome": "Filetto di Branzino",
+          "descrizione": "Con salsa al limone e prezzemolo.",
+          "immagine": "./img/menu/sabato/p2.jpg",
+          "prezzo": "135€"
+        }
+      ]
+    },
+    "domenica": {
+      "piatti": [
+        {
+          "nome": "Risotto alla Milanese",
+          "descrizione": "Con zafferano e formaggio grana.",
+          "immagine": "./img/menu/domenica/p1.jpg",
+          "prezzo": "120€"
+        },
+        {
+          "nome": "Pollo Arrosto",
+          "descrizione": "Con patate e rosmarino.",
+          "immagine": "./img/menu/domenica/p2.jpg",
+          "prezzo": "95€"
+        }
+      ]
+    }
+  }
+}

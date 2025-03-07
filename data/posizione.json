@@ -1,0 +1,13 @@
+{
+  "posizione": {
+    "indirizzo": "Villa Storica, Via delle Stelle, 25",
+    "latitudine": 41.9028,
+    "longitudine": 12.4964,
+    "paymentIcons": [
+      { "name": "visa", "path": "img/visa.png" },
+      { "name": "mastercard", "path": "img/mastercard.png" },
+      { "name": "paypal", "path": "img/paypal.png" },
+      { "name": "apple-pay", "path": "img/apple-pay.png" }
+    ]
+  }
+}

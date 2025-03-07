@@ -1,0 +1,95 @@
+{
+  "eventi": [
+    {
+      "nome": "Capodanno Stellato con Show di Fuochi d'Artificio",
+      "data": "2024-12-31",
+      "descrizione": "Festeggia il Capodanno con una cena gourmet e uno spettacolo di fuochi d'artificio esclusivo.",
+      "foto": "./img/eventi/1.jpeg"
+    },
+    {
+      "nome": "Cena di Beneficenza con Chef Michelin",
+      "data": "2025-01-22",
+      "descrizione": "Un evento di beneficenza dove i partecipanti potranno degustare piatti preparati da un chef stellato, contribuendo a una causa nobile.",
+      "foto": "./img/eventi/2.jpeg"
+    },
+    {
+      "nome": "Cucina Tradizionale con un Tocco Moderno",
+      "data": "2025-01-23",
+      "descrizione": "Un evento che celebra la cucina tradizionale italiana con un tocco innovativo, preparata da un chef di fama mondiale.",
+      "foto": "./img/eventi/3.jpeg"
+    },
+    {
+      "nome": "Cena con Paired Wines da Vigneti Italiani",
+      "data": "2025-01-24",
+      "descrizione": "Un'esclusiva serata di degustazione di piatti gourmet, ogni portata abbinata a un vino selezionato da prestigiosi vigneti italiani.",
+      "foto": "./img/eventi/4.jpeg"
+    },
+    {
+      "nome": "Cena Gourmet con Chef Stellato",
+      "data": "2025-01-25",
+      "descrizione": "Una cena esclusiva dedicata alla gastronomia, con piatti unici preparati da uno chef stellato, per un'esperienza culinaria senza pari.",
+      "foto": "./img/eventi/5.jpeg"
+    },
+    {
+      "nome": "Notte delle Stelle Michelin",
+      "data": "2025-01-26",
+      "descrizione": "Un evento esclusivo per celebrare la cucina stellata, con un menu degustazione di piatti preparati dai migliori chef Michelin.",
+      "foto": "./img/eventi/6.jpeg"
+    },
+    {
+      "nome": "Cena Degustazione con Piatti a Base di Tartufo",
+      "data": "2025-01-27",
+      "descrizione": "Un esclusivo menu degustazione con piatti preparati con il pregiato tartufo, uno dei più ricercati ingredienti della cucina gourmet.",
+      "foto": "./img/eventi/7.jpeg"
+    },
+    {
+      "nome": "Masterclass di Alta Cucina con Chef Stellato",
+      "data": "2025-01-28",
+      "descrizione": "Una masterclass in cui i partecipanti potranno imparare i segreti della cucina stellata direttamente da un grande chef.",
+      "foto": "./img/eventi/8.jpeg"
+    },
+    {
+      "nome": "Cena dei 5 Sensi con Chef Stellato",
+      "data": "2025-01-29",
+      "descrizione": "Un'esperienza gastronomica che stimola tutti i sensi, con piatti e tecniche innovative che coinvolgono la vista, il gusto, l'olfatto, il tatto e l'udito.",
+      "foto": "./img/eventi/9.jpeg"
+    },
+    {
+      "nome": "La Magia del Cioccolato in Alta Cucina",
+      "data": "2025-01-20",
+      "descrizione": "Un evento esclusivo dove il cioccolato di alta qualità viene utilizzato in piatti gourmet preparati da chef stellati.",
+      "foto": "./img/eventi/10.jpeg"
+    },
+    {
+      "nome": "Cena a Tema Truffle & Champagne",
+      "data": "2025-01-21",
+      "descrizione": "Un evento raffinato che celebra il tartufo abbinato a champagne pregiati, con piatti gourmet che esaltano i sapori di entrambi.",
+      "foto": "./img/eventi/11.jpeg"
+    },
+    {
+      "nome": "Cena con Chef VIP e Degustazione di Formaggi",
+      "data": "2025-01-30",
+      "descrizione": "Un evento esclusivo con un famoso chef VIP, dove ogni piatto è accompagnato da una selezione di formaggi rari e pregiati.",
+      "foto": "./img/eventi/12.jpg"
+    },
+    {
+      "nome": "Serata Gourmet con Abbinamenti di Vino e Cioccolato",
+      "data": "2025-01-31",
+      "descrizione": "Un’esperienza esclusiva che abbina piatti gourmet con vino e cioccolato di alta classe, per un'armoniosa esperienza sensoriale.",
+      "foto": "./img/eventi/13.jpg"
+    },
+    {
+      "nome": "Cena al Buio con Chef Stellato e Sommelier",
+      "data": "2025-02-01",
+      "descrizione": "Un'esperienza unica dove gli ospiti mangiano al buio, stimolando gli altri sensi, con l'assistenza di un sommelier per l'abbinamento dei vini.",
+      "foto": "./img/eventi/14.jpg"
+    }
+    ,
+    {
+      "nome": "Notte dei Sapori Rari con Piatti da Chef Stellati",
+      "data": "2025-02-02",
+      "descrizione": "Una serata di alta classe dove i piatti gourmet saranno preparati con ingredienti rari e pregiati, da un team di chef stellati.",
+      "foto": "./img/eventi/15.jpg"
+    }
+  ]
+}

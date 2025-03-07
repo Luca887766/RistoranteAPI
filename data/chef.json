@@ -1,0 +1,19 @@
+{
+  "chef": [
+    {
+      "nome": "Leonardo Ferri – Chef",
+      "bio": "Leonardo Ferri è un innovativo chef stellato che unisce tradizione e modernità, creando piatti unici grazie alla sua esperienza nelle migliori cucine d'Europa.",
+      "foto": "./img/chef/photo1.jpg"
+    },
+    {
+      "nome": "Maria Conti – Sous Chef",
+      "bio": "Maria Conti, sous chef talentuosa, combina tradizione italiana e influenze internazionali per creare piatti perfetti, guidando con passione la brigata.",
+      "foto": "./img/chef/photo2.jpg"
+    },
+    {
+      "nome": "Andrea Russo – Pasticcere",
+      "bio": "Andrea Russo, maestro pasticcere, trasforma dessert in opere d’arte, unendo eleganza, gusto e ingredienti di alta qualità con un tocco innovativo.",
+      "foto": "./img/chef/photo3.jpg"
+    }
+  ]
+}

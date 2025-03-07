@@ -1,0 +1,24 @@
+{
+    "items": [
+        {
+            "titolo": "Storia del Ristorante",
+            "contenuto": "Fondato nel 2021, *Il Gusto delle Stelle* è nato dal sogno dello Chef Leonardo Ferri di creare un luogo in cui la tradizione culinaria italiana si fondesse con l’innovazione e la creatività. Il ristorante è situato in una villa storica del XVIII secolo, ristrutturata per offrire un ambiente elegante e accogliente. L’arredamento è ispirato alla bellezza del cielo notturno, con tonalità calde e decorazioni che richiamano costellazioni.",
+            "immagine": "img/locale.jpeg"
+        },
+        {
+            "titolo": "Caseificio Stella d’Oro",
+            "contenuto": "Formaggi artigianali per i nostri piatti.",
+            "immagine": "img/caseificio.jpeg"
+        },
+        {
+            "titolo": "Vigna delle Stelle",
+            "contenuto": "Cantina biologica che fornisce vini esclusivi.",
+            "immagine": "img/vigna.jpeg"
+        },
+        {
+            "titolo": "Panificio Antica Tradizione",
+            "contenuto": "Pane fresco preparato ogni giorno con lievito madre.",
+            "immagine": "img/panificio.jpeg"
+        }
+    ]
+}
