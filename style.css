@@ -946,13 +946,11 @@ footer iframe.map {
 }
 
 .input-group {
-  width: 20rem;
+  width: 100%; /* Take full width */
   padding: 1.25rem;
   box-sizing: border-box;
-  position: absolute; /* Absolute positioning */
-  top: 5rem; /* Position below button box */
-  left: 0;
   transition: opacity 0.5s ease-in-out;
+  position: relative; /* Remove absolute positioning */
 }
 
 .input-field {
@@ -962,6 +960,7 @@ footer iframe.map {
   border: 0.0625rem solid #ccc;
   border-radius: 0.25rem;
   box-sizing: border-box;
+  display: block; /* Ensure input fields are block-level elements */
 }
 
 .submit-btn {
@@ -972,7 +971,7 @@ footer iframe.map {
   border: none;
   border-radius: 0.25rem;
   cursor: pointer;
-  margin-top: 16rem; /* Position below forms */
+  margin-top: 0.625rem; /* Reduced margin */
 }
 
 #login-form,
@@ -980,6 +979,8 @@ footer iframe.map {
   width: 100%;
   box-sizing: border-box;
   padding: 0 1.25rem;
+  position: absolute;
+  top: 7rem; /* Position below button box */
 }
 
 /* Initially hide the register form */
