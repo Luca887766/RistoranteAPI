@@ -910,6 +910,14 @@ footer iframe.map {
   position: relative;
 }
 
+.form-container {
+  width: 35rem;
+  height: auto; /* Changed from 100% to auto */
+  position: relative;
+  display: flex; /* Ensure forms are side by side */
+  transition: transform 0.5s ease-in-out;
+}
+
 .button-box {
   width: 13.75rem;
   margin: 2.1875rem auto;
@@ -940,98 +948,11 @@ footer iframe.map {
 }
 
 .input-group {
-  top: 11.25rem;
-  position: absolute;
-  width: 20rem;
-  transition: .3s;
-}
-
-.input-field {
-  width: 13.75rem;
-  padding: 0.625rem 0;
-  margin: 0.3125rem 0;
-  border-left: 0;
-  border-top: 0;
-  border-right: 0;
-  border-bottom: 0.0625rem solid #999;
-  outline: none;
-  background: transparent;
-}
-
-.submit-btn {
-  width: 85%;
-  padding: 0.625rem 1.875rem;
-  cursor: pointer;
-  display: block;
-  margin: auto;
-  background: #270514;
-  border: 0;
-  outline: none;
-  border-radius: 1.875rem;
-}
-
-#login-form {
-  left: 3.125rem;
-}
-
-#register-form {
-  left: 28.125rem;
-}
-
-/* force the forms to be on the same line */
-#login-form,
-#register-form {
-  display: inline-block;
-}
-
-/* Ensure forms take up the full width and are positioned correctly */
-#login-form,
-#register-form {
-  position: absolute;
-  width: 100%;
-  box-sizing: border-box;
-  padding: 0 1.25rem;
-}
-
-#login-form {
-  left: 0;
-}
-
-#register-form {
-  left: 100%;
-}
-
-.form-container {
-  position: relative;
-  width: 35rem; /* Double the width of a single form */
-  height: auto;
-  transition: transform 0.3s ease-in-out;
-}
-
-#login-register-container {
-  width: 20rem;
-  height: auto;
-  margin: 3.125rem auto;
-  box-shadow: 0 0 1.25rem 0.5625rem #ff539d31;
-  border-radius: 1.875rem;
-  overflow: hidden;
-  position: relative;
-}
-
-/* force the forms to be on the same line */
-.form-container {
-  display: flex;
-  transition: transform 0.5s ease-in-out;
-}
-
-/* Style for each form */
-.input-group {
   width: 20rem;
   padding: 1.25rem;
   box-sizing: border-box;
 }
 
-/* Style for input fields */
 .input-field {
   width: 100%;
   padding: 0.625rem;
@@ -1041,7 +962,6 @@ footer iframe.map {
   box-sizing: border-box;
 }
 
-/* Style for submit button */
 .submit-btn {
   width: 100%;
   padding: 0.625rem;
@@ -1052,35 +972,19 @@ footer iframe.map {
   cursor: pointer;
 }
 
-/* Style for the button box */
-.button-box {
-  width: 13.75rem;
-  margin: 2.1875rem auto;
-  position: relative;
-  box-shadow: 0 0 1.25rem 0.5625rem #ff539d31;
-  border-radius: 1.875rem;
+#login-form,
+#register-form {
+  width: 20rem; /* Correct width for each form */
+  box-sizing: border-box;
+  padding: 0 1.25rem;
 }
 
-/* Style for the toggle buttons */
-.toggle-btn {
-  padding: 0.625rem 1.875rem;
-  cursor: pointer;
-  background: transparent;
-  border: 0;
-  outline: none;
-  position: relative;
+#login-form {
+  transform: translateX(0); /* Ensure login form is visible */
 }
 
-/* Style for the slider button */
-#btn {
-  top: 0;
-  left: 0;
-  position: absolute;
-  width: 6.875rem;
-  height: 100%;
-  background: #270514;
-  border-radius: 1.875rem;
-  transition: .3s;
+#register-form {
+  transform: translateX(100%); /* Ensure register form is initially hidden */
 }
 
 /* Admin Styles */
