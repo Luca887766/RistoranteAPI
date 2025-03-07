@@ -911,10 +911,10 @@ footer iframe.map {
 }
 
 .form-container {
-  width: 35rem;
-  height: auto; /* Changed from 100% to auto */
+  width: 40rem; /* Adjusted width */
+  height: auto;
   position: relative;
-  display: flex; /* Ensure forms are side by side */
+  display: flex;
   transition: transform 0.5s ease-in-out;
 }
 
@@ -974,17 +974,10 @@ footer iframe.map {
 
 #login-form,
 #register-form {
-  width: 20rem; /* Correct width for each form */
+  width: 20rem;
   box-sizing: border-box;
   padding: 0 1.25rem;
-}
-
-#login-form {
-  transform: translateX(0); /* Ensure login form is visible */
-}
-
-#register-form {
-  transform: translateX(100%); /* Ensure register form is initially hidden */
+  flex-shrink: 0; /* Prevent forms from shrinking */
 }
 
 /* Admin Styles */
