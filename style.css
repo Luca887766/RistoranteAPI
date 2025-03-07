@@ -906,7 +906,13 @@ footer iframe.map {
   margin: 100px auto;
   box-shadow: 0 0 20px 9px #ff539d31;
   border-radius: 30px;
-  overflow: hidden; /* Ensure content doesn't overflow */
+  overflow: hidden;
+  position: relative;
+}
+
+.form-container {
+  width: 100%;
+  height: 100%;
   position: relative;
 }
 
@@ -943,12 +949,10 @@ footer iframe.map {
   position: absolute;
   width: 280px;
   transition: .3s;
-  padding: 0 20px; /* Add padding to contain input fields */
-  box-sizing: border-box; /* Include padding in width calculation */
 }
 
 .input-field {
-  width: 100%; /* Expand input fields to fill container */
+  width: 220px;
   padding: 10px 0;
   margin: 5px 0;
   border-left: 0;
@@ -957,7 +961,6 @@ footer iframe.map {
   border-bottom: 1px solid #999;
   outline: none;
   background: transparent;
-  box-sizing: border-box; /* Include padding in width calculation */
 }
 
 .submit-btn {
@@ -972,19 +975,12 @@ footer iframe.map {
   border-radius: 30px;
 }
 
-span {
-  color: #777;
-  font-size: 12px;
-  bottom: 68px;
-  position: absolute;
-}
-
 #login-form {
   left: 50px;
 }
 
 #register-form {
-  left: 450px; /* Shift register form further to the right */
+  left: 450px;
 }
 
 #login-register-container {

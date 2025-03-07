@@ -27,22 +27,27 @@
     </div>
     <div id="prenotazioni" class="sezione-contenuto">
       <div id="login-register-container">
-        <div class="button-box">
-          <div id="btn"></div>
-          <button type="button" class="toggle-btn" onclick="login()">Log In</button>
-          <button type="button" class="toggle-btn" onclick="register()">Register</button>
+        <div class="form-container">
+          <div class="button-box">
+            <div id="btn"></div>
+            <button type="button" class="toggle-btn" onclick="login()">Log In</button>
+            <button type="button" class="toggle-btn" onclick="register()">Register</button>
+          </div>
+
+          <form id="login-form" class="input-group">
+            <input type="text" class="input-field" placeholder="Username" required id="login-username">
+            <input type="password" class="input-field" placeholder="Enter Password" required id="login-password">
+            <button type="submit" class="submit-btn">Log in</button>
+          </form>
+
+          <form id="register-form" class="input-group">
+            <input type="text" class="input-field" placeholder="Username" required id="register-username">
+            <input type="password" class="input-field" placeholder="Enter Password" required id="register-password">
+            <button type="submit" class="submit-btn">Register</button>
+          </form>
         </div>
-        <form id="login-form" class="input-group">
-          <input type="text" class="input-field" placeholder="Username" required id="login-username">
-          <input type="password" class="input-field" placeholder="Enter Password" required id="login-password">
-          <button type="submit" class="submit-btn">Log in</button>
-        </form>
-        <form id="register-form" class="input-group">
-          <input type="text" class="input-field" placeholder="Username" required id="register-username">
-          <input type="password" class="input-field" placeholder="Enter Password" required id="register-password">
-          <button type="submit" class="submit-btn">Register</button>
-        </form>
       </div>
+
       <div id="reservation-form-container" style="display: none;">
         <h2>Prenota un Tavolo</h2>
         <form id="reservation-form">
