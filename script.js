@@ -35,7 +35,7 @@ let z = document.getElementById("btn");
 let formContainer = document.querySelector(".form-container");
 
 function register() {
-  formContainer.style.transform = "translateX(-100%)";
+  formContainer.style.transform = "translateX(-280px)";
   z.style.left = "110px";
 }
 

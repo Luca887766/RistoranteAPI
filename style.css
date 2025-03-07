@@ -901,32 +901,26 @@ footer iframe.map {
 
 /* Login/Register Styles */
 #login-register-container {
-  width: 280px;
+  width: 20rem;
   height: auto;
-  margin: 100px auto;
-  box-shadow: 0 0 20px 9px #ff539d31;
-  border-radius: 30px;
+  margin: 3.125rem auto;
+  box-shadow: 0 0 1.25rem 0.5625rem #ff539d31;
+  border-radius: 1.875rem;
   overflow: hidden;
   position: relative;
 }
 
-.form-container {
-  width: 100%;
-  height: 100%;
-  position: relative;
-}
-
 .button-box {
-  width: 220px;
-  margin: 35px auto;
+  width: 13.75rem;
+  margin: 2.1875rem auto;
   position: relative;
-  box-shadow: 0 0 20px 9px #ff539d31;
-  border-radius: 30px;
-  z-index: 1; /* Ensure buttons are above the forms */
+  box-shadow: 0 0 1.25rem 0.5625rem #ff539d31;
+  border-radius: 1.875rem;
+  z-index: 1;
 }
 
 .toggle-btn {
-  padding: 10px 30px;
+  padding: 0.625rem 1.875rem;
   cursor: pointer;
   background: transparent;
   border: 0;
@@ -938,53 +932,50 @@ footer iframe.map {
   top: 0;
   left: 0;
   position: absolute;
-  width: 110px;
+  width: 6.875rem;
   height: 100%;
   background: #270514;
-  border-radius: 30px;
+  border-radius: 1.875rem;
   transition: .3s;
 }
 
 .input-group {
-  top: 180px;
+  top: 11.25rem;
   position: absolute;
-  width: 280px;
+  width: 20rem;
   transition: .3s;
-  padding: 0 20px;
-  box-sizing: border-box;
 }
 
 .input-field {
-  width: 100%;
-  padding: 10px 0;
-  margin: 5px 0;
+  width: 13.75rem;
+  padding: 0.625rem 0;
+  margin: 0.3125rem 0;
   border-left: 0;
   border-top: 0;
   border-right: 0;
-  border-bottom: 1px solid #999;
+  border-bottom: 0.0625rem solid #999;
   outline: none;
   background: transparent;
-  box-sizing: border-box;
 }
 
 .submit-btn {
   width: 85%;
-  padding: 10px 30px;
+  padding: 0.625rem 1.875rem;
   cursor: pointer;
   display: block;
   margin: auto;
   background: #270514;
   border: 0;
   outline: none;
-  border-radius: 30px;
+  border-radius: 1.875rem;
 }
 
 #login-form {
-  left: 50px;
+  left: 3.125rem;
 }
 
 #register-form {
-  left: 450px;
+  left: 28.125rem;
 }
 
 /* force the forms to be on the same line */
@@ -999,7 +990,7 @@ footer iframe.map {
   position: absolute;
   width: 100%;
   box-sizing: border-box;
-  padding: 0 20px;
+  padding: 0 1.25rem;
 }
 
 #login-form {
@@ -1012,19 +1003,84 @@ footer iframe.map {
 
 .form-container {
   position: relative;
-  width: 560px; /* Double the width of a single form */
+  width: 35rem; /* Double the width of a single form */
   height: auto;
   transition: transform 0.3s ease-in-out;
 }
 
 #login-register-container {
-  width: 280px;
+  width: 20rem;
   height: auto;
-  margin: 100px auto;
-  box-shadow: 0 0 20px 9px #ff539d31;
-  border-radius: 30px;
+  margin: 3.125rem auto;
+  box-shadow: 0 0 1.25rem 0.5625rem #ff539d31;
+  border-radius: 1.875rem;
   overflow: hidden;
   position: relative;
+}
+
+/* force the forms to be on the same line */
+.form-container {
+  display: flex;
+  transition: transform 0.5s ease-in-out;
+}
+
+/* Style for each form */
+.input-group {
+  width: 20rem;
+  padding: 1.25rem;
+  box-sizing: border-box;
+}
+
+/* Style for input fields */
+.input-field {
+  width: 100%;
+  padding: 0.625rem;
+  margin: 0.3125rem 0;
+  border: 0.0625rem solid #ccc;
+  border-radius: 0.25rem;
+  box-sizing: border-box;
+}
+
+/* Style for submit button */
+.submit-btn {
+  width: 100%;
+  padding: 0.625rem;
+  background-color: #270514;
+  color: white;
+  border: none;
+  border-radius: 0.25rem;
+  cursor: pointer;
+}
+
+/* Style for the button box */
+.button-box {
+  width: 13.75rem;
+  margin: 2.1875rem auto;
+  position: relative;
+  box-shadow: 0 0 1.25rem 0.5625rem #ff539d31;
+  border-radius: 1.875rem;
+}
+
+/* Style for the toggle buttons */
+.toggle-btn {
+  padding: 0.625rem 1.875rem;
+  cursor: pointer;
+  background: transparent;
+  border: 0;
+  outline: none;
+  position: relative;
+}
+
+/* Style for the slider button */
+#btn {
+  top: 0;
+  left: 0;
+  position: absolute;
+  width: 6.875rem;
+  height: 100%;
+  background: #270514;
+  border-radius: 1.875rem;
+  transition: .3s;
 }
 
 /* Admin Styles */
