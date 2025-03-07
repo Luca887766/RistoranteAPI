@@ -911,16 +911,14 @@ footer iframe.map {
 }
 
 .form-container {
-  width: 40rem; /* Adjusted width */
+  width: 20rem;
   height: auto;
   position: relative;
-  display: flex;
-  transition: transform 0.5s ease-in-out;
 }
 
 .button-box {
   width: 13.75rem;
-  margin: 2.1875rem auto;
+  margin: 1rem auto; /* Reduced margin */
   position: relative;
   box-shadow: 0 0 1.25rem 0.5625rem #ff539d31;
   border-radius: 1.875rem;
@@ -951,6 +949,10 @@ footer iframe.map {
   width: 20rem;
   padding: 1.25rem;
   box-sizing: border-box;
+  position: absolute; /* Absolute positioning */
+  top: 5rem; /* Position below button box */
+  left: 0;
+  transition: opacity 0.5s ease-in-out;
 }
 
 .input-field {
@@ -970,14 +972,26 @@ footer iframe.map {
   border: none;
   border-radius: 0.25rem;
   cursor: pointer;
+  margin-top: 16rem; /* Position below forms */
 }
 
 #login-form,
 #register-form {
-  width: 20rem;
+  width: 100%;
   box-sizing: border-box;
   padding: 0 1.25rem;
-  flex-shrink: 0; /* Prevent forms from shrinking */
+}
+
+/* Initially hide the register form */
+#register-form {
+  opacity: 0;
+  display: none;
+}
+
+/* Class to show the form with fade-in effect */
+.fade-in {
+  opacity: 1;
+  display: block;
 }
 
 /* Admin Styles */

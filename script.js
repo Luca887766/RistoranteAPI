@@ -35,12 +35,14 @@ let z = document.getElementById("btn");
 let formContainer = document.querySelector(".form-container");
 
 function register() {
-  formContainer.style.transform = "translateX(-20rem)";
+  x.classList.remove("fade-in");
+  y.classList.add("fade-in");
   z.style.left = "6.875rem";
 }
 
 function login() {
-  formContainer.style.transform = "translateX(0)";
+  y.classList.remove("fade-in");
+  x.classList.add("fade-in");
   z.style.left = "0";
 }
 
