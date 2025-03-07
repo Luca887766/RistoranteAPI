@@ -29,6 +29,22 @@ function mostraSezione(idSezione) {
   }, 300);
 }
 
+let x = document.getElementById("login-form");
+let y = document.getElementById("register-form");
+let z = document.getElementById("btn");
+
+function register() {
+  x.style.left = "-400px";
+  y.style.left = "50px";
+  z.style.left = "110px";
+}
+
+function login() {
+  x.style.left = "50px";
+  y.style.left = "450px";
+  z.style.left = "0";
+}
+
 // New function to handle the display of reservation content based on login status
 function updateReservationSection() {
   const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
@@ -311,7 +327,11 @@ function caricaPrenotazioni() {
       .then(data => {
         if (data.success) {
           alert(data.success);
-          // Optionally switch to login form after successful registration
+          // Clear registration form fields
+          document.getElementById('register-username').value = '';
+          document.getElementById('register-password').value = '';
+          // Switch to login form
+          login();
         } else {
           alert(data.error);
         }
