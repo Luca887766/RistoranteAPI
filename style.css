@@ -1105,3 +1105,65 @@ footer iframe.map {
   color: red;
   margin-top: 0.5rem;
 }
+
+.auth-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 80vh;
+  padding: 2rem;
+}
+
+#login-register-container {
+  background-color: #fff;
+  border-radius: 0.75rem;
+  box-shadow: 0 0 1rem rgba(0, 0, 0, 0.1);
+  width: 22rem;
+  padding: 2rem;
+}
+
+#login-register-container form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+#login-register-container .form-row {
+  display: flex;
+  flex-direction: column;
+}
+
+#login-register-container label {
+  margin-bottom: 0.25rem;
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: #555;
+}
+
+#login-register-container input {
+  padding: 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 0.25rem;
+}
+
+#login-register-container button {
+  border: none;
+  border-radius: 0.25rem;
+  padding: 0.75rem;
+  background-color: #4285f4;
+  color: #fff;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+#login-register-container button:hover {
+  background-color: #357ae8;
+}
+
+.error-message {
+  color: #d93025;
+  font-size: 0.8rem;
+  min-height: 1rem;
+  margin-top: -0.25rem;
+}
