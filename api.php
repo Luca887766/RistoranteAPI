@@ -38,21 +38,29 @@ switch ($action) {
 }
 
 function registerUser($conn) {
-    $username = $_POST['username'];
-    $password = hash('sha256', $_POST['password']);
-
-    $sql = "INSERT INTO users (username, password) VALUES ('$username', '$password')";
-
+    $email = $_POST['email'] ?? '';
+    $username = $_POST['username'] ?? '';
+    $password = $_POST['password'] ?? '';
+    if (!$email || !$username || !$password) {
+        echo json_encode(['error' => 'Missing required fields']);
+        return;
+    }
+    if (strlen($password) < 8) {
+        echo json_encode(['error' => 'Password must be at least 8 characters']);
+        return;
+    }
+    $hashed = hash('sha256', $password);
+    $sql = "INSERT INTO users (email, username, password) VALUES ('$email', '$username', '$hashed')";
     if ($conn->query($sql) === TRUE) {
-        echo json_encode(['success' => 'User registered successfully']);
+        echo json_encode(['success' => 'Registration successful']);
     } else {
-        echo json_encode(['error' => 'Error registering user: ' . $conn->error]);
+        echo json_encode(['error' => 'Error: ' . $conn->error]);
     }
 }
 
 function loginUser($conn) {
-    $username = $_POST['username'];
-    $password = hash('sha256', $_POST['password']);
+    $username = $_POST['username'] ?? '';
+    $password = hash('sha256', $_POST['password'] ?? '');
 
     $sql = "SELECT id, username, password FROM users WHERE username = '$username'";
     $result = $conn->query($sql);
@@ -70,7 +78,6 @@ function loginUser($conn) {
         echo json_encode(['error' => 'User not found']);
     }
 }
-
 
 function logoutUser() {
     session_destroy();

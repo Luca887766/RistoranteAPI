@@ -627,3 +627,86 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   });
 });
+
+document.addEventListener('DOMContentLoaded', function() {
+  const loginTab = document.getElementById('login-tab');
+  const registerTab = document.getElementById('register-tab');
+  const loginForm = document.getElementById('login-form');
+  const registerForm = document.getElementById('register-form');
+  const loginError = document.getElementById('login-error');
+  const registerError = document.getElementById('register-error');
+
+  function showLoginForm() {
+    loginForm.style.display = 'flex';
+    registerForm.style.display = 'none';
+    loginTab.classList.add('active');
+    registerTab.classList.remove('active');
+    loginError.textContent = '';
+    registerError.textContent = '';
+  }
+
+  function showRegisterForm() {
+    loginForm.style.display = 'none';
+    registerForm.style.display = 'flex';
+    registerTab.classList.add('active');
+    loginTab.classList.remove('active');
+    loginError.textContent = '';
+    registerError.textContent = '';
+  }
+
+  loginTab.addEventListener('click', showLoginForm);
+  registerTab.addEventListener('click', showRegisterForm);
+
+  loginForm.addEventListener('submit', function(event) {
+    event.preventDefault();
+    loginError.textContent = '';
+    const username = document.getElementById('login-username').value;
+    const password = document.getElementById('login-password').value;
+    if(!username || !password){
+      loginError.textContent = 'Please fill all fields.';
+      return;
+    }
+    fetch('api.php?action=login', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+      body: `username=${username}&password=${password}`
+    })
+    .then(r => r.json())
+    .then(data => {
+      if(data.success) {
+        alert('Login successful');
+      } else {
+        loginError.textContent = data.error || 'Login failed.';
+      }
+    });
+  });
+
+  registerForm.addEventListener('submit', function(event) {
+    event.preventDefault();
+    registerError.textContent = '';
+    const email = document.getElementById('register-email').value;
+    const username = document.getElementById('register-username').value;
+    const password = document.getElementById('register-password').value;
+    if(!email || !username || !password){
+      registerError.textContent = 'Please fill all fields.';
+      return;
+    }
+    fetch('api.php?action=register', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+      body: `email=${email}&username=${username}&password=${password}`
+    })
+    .then(r => r.json())
+    .then(data => {
+      if(data.success) {
+        alert('Registration successful');
+        showLoginForm();
+      } else {
+        registerError.textContent = data.error || 'Registration failed.';
+      }
+    });
+  });
+
+  // Show login form by default
+  showLoginForm();
+});
