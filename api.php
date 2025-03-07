@@ -39,7 +39,7 @@ switch ($action) {
 
 function registerUser($conn) {
     $username = $_POST['username'];
-    $password = password_hash($_POST['password'], PASSWORD_DEFAULT);
+    $password = hash('sha256', $_POST['password']);
 
     $sql = "INSERT INTO users (username, password) VALUES ('$username', '$password')";
 
@@ -52,14 +52,14 @@ function registerUser($conn) {
 
 function loginUser($conn) {
     $username = $_POST['username'];
-    $password = $_POST['password'];
+    $password = hash('sha256', $_POST['password']);
 
     $sql = "SELECT id, username, password FROM users WHERE username = '$username'";
     $result = $conn->query($sql);
 
     if ($result->num_rows > 0) {
         $user = $result->fetch_assoc();
-        if (password_verify($password, $user['password'])) {
+        if ($user['password'] === $password) {
             $_SESSION['user_id'] = $user['id'];
             $_SESSION['username'] = $user['username'];
             echo json_encode(['success' => 'Login successful', 'username' => $user['username']]);
@@ -70,6 +70,7 @@ function loginUser($conn) {
         echo json_encode(['error' => 'User not found']);
     }
 }
+
 
 function logoutUser() {
     session_destroy();
