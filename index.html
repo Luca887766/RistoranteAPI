@@ -25,7 +25,85 @@
       <div id="sous-chef"></div>
       <div id="pasticcere"></div>
     </div>
-    <div id="prenotazioni" class="sezione-contenuto"></div>
+    <div id="prenotazioni" class="sezione-contenuto">
+      <div id="login-register-container">
+        <div id="slider"></div>
+        <div class="login-box">
+          <h2>Login</h2>
+          <form id="login-form">
+            <div class="input-group">
+              <label for="login-username">Username:</label>
+              <input type="text" id="login-username" name="username" required>
+            </div>
+            <div class="input-group">
+              <label for="login-password">Password:</label>
+              <input type="password" id="login-password" name="password" required>
+            </div>
+            <button type="submit">Login</button>
+          </form>
+        </div>
+        <div class="register-box">
+          <h2>Register</h2>
+          <form id="register-form">
+            <div class="input-group">
+              <label for="register-username">Username:</label>
+              <input type="text" id="register-username" name="username" required>
+            </div>
+            <div class="input-group">
+              <label for="register-password">Password:</label>
+              <input type="password" id="register-password" name="password" required>
+            </div>
+            <button type="submit">Register</button>
+          </form>
+        </div>
+      </div>
+      <div id="reservation-form-container" style="display: none;">
+        <h2>Prenota un Tavolo</h2>
+        <form id="reservation-form">
+          <div class="form-row">
+            <label for="nome">Nome:</label>
+            <input type="text" id="nome" name="nome" required>
+          </div>
+          <div class="form-row">
+            <label for="data">Data:</label>
+            <input type="date" id="data" name="data" required>
+          </div>
+          <div class="form-row">
+            <label for="ora">Ora:</label>
+            <select id="ora" name="ora" required>
+              <option value="19:00">19:00</option>
+              <option value="20:00">20:00</option>
+              <option value="21:00">21:00</option>
+            </select>
+          </div>
+          <div class="form-row">
+            <label for="persone">Numero di Persone:</label>
+            <input type="number" id="persone" name="persone" min="1" max="10" required>
+          </div>
+          <div class="form-row">
+            <label for="contatto">Contatto:</label>
+            <input type="tel" id="contatto" name="contatto" required>
+          </div>
+          <button type="submit">Prenota</button>
+        </form>
+      </div>
+      <div id="admin-reservations" style="display: none;">
+        <h2>Admin - Lista Prenotazioni</h2>
+        <table id="reservations-table">
+          <thead>
+            <tr>
+              <th>Nome</th>
+              <th>Data</th>
+              <th>Ora</th>
+              <th>Persone</th>
+              <th>Contatto</th>
+            </tr>
+          </thead>
+          <tbody>
+          </tbody>
+        </table>
+      </div>
+    </div>
   </div>
 
   <footer></footer>

@@ -29,6 +29,47 @@ function mostraSezione(idSezione) {
   }, 300);
 }
 
+// New function to handle the display of reservation content based on login status
+function updateReservationSection() {
+  const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+  const isAdmin = localStorage.getItem('username') === 'admin';
+
+  document.getElementById('login-register-container').style.display = isLoggedIn ? 'none' : 'block';
+  document.getElementById('reservation-form-container').style.display = (isLoggedIn && !isAdmin) ? 'block' : 'none';
+  document.getElementById('admin-reservations').style.display = (isLoggedIn && isAdmin) ? 'block' : 'none';
+
+  if (isAdmin) {
+    fetchReservations();
+  }
+}
+
+function fetchReservations() {
+  fetch('api.php?action=get_reservations')
+    .then(response => response.json())
+    .then(data => {
+      if (data.error) {
+        alert(data.error);
+        return;
+      }
+
+      const tableBody = document.querySelector('#admin-reservations #reservations-table tbody');
+      tableBody.innerHTML = '';
+
+      data.forEach(reservation => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${reservation.nome_cliente}</td>
+          <td>${reservation.data}</td>
+          <td>${reservation.ora}</td>
+          <td>${reservation.persone}</td>
+          <td>${reservation.contatto}</td>
+        `;
+        tableBody.appendChild(row);
+      });
+    })
+    .catch(error => console.error('Error fetching reservations:', error));
+}
+
 async function caricaMenuGiornaliero() {
   try {
     const response = await fetch('./data/menu.json');
@@ -224,255 +265,89 @@ function caricaChef() {
 
 // Funzione per generare il modulo di prenotazione e il calendario
 function caricaPrenotazioni() {
-  const prenotazioniDiv = document.getElementById('prenotazioni');
-  prenotazioniDiv.innerHTML = '';
+  // This function is now only responsible for setting up event listeners
+  const loginForm = document.getElementById('login-form');
+  const registerForm = document.getElementById('register-form');
+  const reservationForm = document.getElementById('reservation-form');
 
-  const formPrenotazione = document.createElement('form');
-  formPrenotazione.id = 'form-prenotazione';
-
-  const titoloForm = document.createElement('h2');
-  titoloForm.textContent = 'Prenota un Tavolo';
-  formPrenotazione.appendChild(titoloForm);
-
-  const formRow1 = document.createElement('div');
-  formRow1.className = 'form-row';
-
-  const labelNome = document.createElement('label');
-  labelNome.setAttribute('for', 'nome');
-  labelNome.textContent = 'Nome:';
-  formRow1.appendChild(labelNome);
-
-  const inputNome = document.createElement('input');
-  inputNome.type = 'text';
-  inputNome.id = 'nome';
-  inputNome.name = 'nome';
-  inputNome.required = true;
-  formRow1.appendChild(inputNome);
-
-  const labelContatto = document.createElement('label');
-  labelContatto.setAttribute('for', 'contatto');
-  labelContatto.textContent = 'Contatto:';
-  formRow1.appendChild(labelContatto);
-
-  const inputContatto = document.createElement('input');
-  inputContatto.type = 'tel';
-  inputContatto.id = 'contatto';
-  inputContatto.name = 'contatto';
-  inputContatto.required = true;
-  formRow1.appendChild(inputContatto);
-
-  const labelPersone = document.createElement('label');
-  labelPersone.setAttribute('for', 'persone');
-  labelPersone.textContent = 'Numero di Persone (max 10):';
-  formRow1.appendChild(labelPersone);
-
-  const inputPersone = document.createElement('input');
-  inputPersone.type = 'number';
-  inputPersone.id = 'persone';
-  inputPersone.name = 'persone';
-  inputPersone.min = '1';
-  inputPersone.max = '10';
-  inputPersone.required = true;
-  formRow1.appendChild(inputPersone);
-
-  formPrenotazione.appendChild(formRow1);
-
-  const formRow2 = document.createElement('div');
-  formRow2.className = 'form-row';
-
-  const labelData = document.createElement('label');
-  labelData.setAttribute('for', 'data');
-  labelData.textContent = 'Data:';
-  formRow2.appendChild(labelData);
-
-  const inputData = document.createElement('input');
-  inputData.type = 'date';
-  inputData.id = 'data';
-  inputData.name = 'data';
-  inputData.required = true;
-  formRow2.appendChild(inputData);
-
-  const labelOra = document.createElement('label');
-  labelOra.setAttribute('for', 'ora');
-  labelOra.textContent = 'Ora:';
-  formRow2.appendChild(labelOra);
-
-  const inputOra = document.createElement('select');
-  inputOra.id = 'ora';
-  inputOra.name = 'ora';
-  inputOra.required = true;
-  formRow2.appendChild(inputOra);
-
-  formPrenotazione.appendChild(formRow2);
-
-  const submitButton = document.createElement('button');
-  submitButton.type = 'submit';
-  submitButton.textContent = 'Prenota';
-  formPrenotazione.appendChild(submitButton);
-
-  const calendarioDiv = document.createElement('div');
-  calendarioDiv.id = 'calendario';
-
-  const titoloCalendario = document.createElement('h2');
-  titoloCalendario.textContent = 'Calendario Prenotazioni';
-  calendarioDiv.appendChild(titoloCalendario);
-
-  const tabella = document.createElement('table');
-  const thead = document.createElement('thead');
-  const trHead = document.createElement('tr');
-  const thData = document.createElement('th');
-  thData.textContent = 'Data';
-  const thPosti = document.createElement('th');
-  thPosti.textContent = 'Posti Disponibili';
-  trHead.appendChild(thData);
-  trHead.appendChild(thPosti);
-  thead.appendChild(trHead);
-  tabella.appendChild(thead);
-
-  const tbody = document.createElement('tbody');
-  tbody.id = 'calendario-body';
-  tabella.appendChild(tbody);
-
-  calendarioDiv.appendChild(tabella);
-
-  prenotazioniDiv.appendChild(formPrenotazione);
-  prenotazioniDiv.appendChild(calendarioDiv);
-
-  const calendarioBody = document.getElementById('calendario-body');
-
-  formPrenotazione.addEventListener('submit', function (event) {
+  loginForm.addEventListener('submit', function (event) {
     event.preventDefault();
+    const username = document.getElementById('login-username').value;
+    const password = document.getElementById('login-password').value;
 
+    fetch('api.php?action=login', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: `username=${username}&password=${password}`,
+    })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          localStorage.setItem('isLoggedIn', 'true');
+          localStorage.setItem('username', data.username);
+          updateReservationSection();
+        } else {
+          alert(data.error);
+        }
+      })
+      .catch(error => console.error('Error logging in:', error));
+  });
+
+  registerForm.addEventListener('submit', function (event) {
+    event.preventDefault();
+    const username = document.getElementById('register-username').value;
+    const password = document.getElementById('register-password').value;
+
+    fetch('api.php?action=register', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: `username=${username}&password=${password}`,
+    })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          alert(data.success);
+          // Optionally switch to login form after successful registration
+        } else {
+          alert(data.error);
+        }
+      })
+      .catch(error => console.error('Error registering:', error));
+  });
+
+  reservationForm.addEventListener('submit', function (event) {
+    event.preventDefault();
     const nome = document.getElementById('nome').value;
     const data = document.getElementById('data').value;
     const ora = document.getElementById('ora').value;
-    const persone = parseInt(document.getElementById('persone').value);
+    const persone = document.getElementById('persone').value;
     const contatto = document.getElementById('contatto').value;
 
-    let valid = true;
-
-    // Validazione del nome
-    const nomeRegex = /^[a-zA-Z\s]+$/;
-    if (!nomeRegex.test(nome)) {
-      inputNome.style.borderColor = 'red';
-      valid = false;
-    } else {
-      inputNome.style.borderColor = '';
-    }
-
-    // Validazione della data
-    const oggi = new Date();
-    const dataPrenotazione = new Date(data);
-    if (dataPrenotazione <= oggi) {
-      inputData.style.borderColor = 'red';
-      valid = false;
-    } else {
-      inputData.style.borderColor = '';
-    }
-
-    // Validazione dell'ora
-    const oraRegex = /^([01]\d|2[0-3]):([0-5]\d)$/;
-    if (!oraRegex.test(ora) || (parseInt(ora.split(':')[0]) < 12 || (parseInt(ora.split(':')[0]) > 15 && parseInt(ora.split(':')[0]) < 19))) {
-      inputOra.style.borderColor = 'red';
-      valid = false;
-    } else {
-      inputOra.style.borderColor = '';
-    }
-
-    // Validazione del contatto
-    const contattoRegex = /^\d{10}$/;
-    if (!contattoRegex.test(contatto)) {
-      inputContatto.style.borderColor = 'red';
-      valid = false;
-    } else {
-      inputContatto.style.borderColor = '';
-    }
-
-    if (!valid) {
-      alert('Per favore, correggi i campi evidenziati in rosso.');
-      return;
-    }
-
-    let prenotazioni = JSON.parse(localStorage.getItem('prenotazioni')) || { prenotazioni: [] };
-    if (!Array.isArray(prenotazioni.prenotazioni)) {
-      prenotazioni.prenotazioni = [];
-    }
-
-    // Check available seats
-    const postiDisponibili = {};
-    prenotazioni.prenotazioni.forEach(prenotazione => {
-      const data = prenotazione.data;
-      if (!postiDisponibili[data]) {
-        postiDisponibili[data] = 50; // Posti disponibili ogni giorno
-      }
-      postiDisponibili[data] -= prenotazione.persone;
-    });
-
-    if (postiDisponibili[data] !== undefined && postiDisponibili[data] - persone < 0) {
-      alert('Non ci sono abbastanza posti disponibili per la data selezionata.');
-      return;
-    }
-
-    const prenotazione = {
-      nome_cliente: nome,
-      data: data,
-      ora: ora,
-      persone: persone,
-      contatto: contatto
-    };
-
-    prenotazioni.prenotazioni.push(prenotazione);
-    localStorage.setItem('prenotazioni', JSON.stringify(prenotazioni));
-    console.log('Prenotazione salvata:', prenotazione);
-
-    alert('Prenotazione effettuata con successo!');
-    formPrenotazione.reset();
-    caricaCalendario();
+    fetch('api.php?action=create_reservation', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: `nome=${nome}&data=${data}&ora=${ora}&persone=${persone}&contatto=${contatto}`,
+    })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          alert(data.success);
+          reservationForm.reset();
+        } else {
+          alert(data.error);
+        }
+      })
+      .catch(error => console.error('Error creating reservation:', error));
   });
 
-  function caricaCalendario() {
-    let prenotazioni = JSON.parse(localStorage.getItem('prenotazioni')) || { prenotazioni: [] };
-    const postiDisponibili = {};
-
-    prenotazioni.prenotazioni.forEach(prenotazione => {
-      const data = prenotazione.data;
-      if (!postiDisponibili[data]) {
-        postiDisponibili[data] = 50; // Posti disponibili ogni giorno
-      }
-      postiDisponibili[data] -= prenotazione.persone;
-    });
-
-    calendarioBody.innerHTML = '';
-    const oggi = new Date();
-    const futureDates = Object.keys(postiDisponibili).filter(data => new Date(data) >= oggi).sort((a, b) => new Date(a) - new Date(b));
-    futureDates.forEach(data => {
-      const tr = document.createElement('tr');
-      const tdData = document.createElement('td');
-      tdData.textContent = data;
-      const tdPosti = document.createElement('td');
-      tdPosti.textContent = postiDisponibili[data];
-      tdPosti.className = postiDisponibili[data] > 0 ? 'available' : 'unavailable';
-      tr.appendChild(tdData);
-      tr.appendChild(tdPosti);
-      calendarioBody.appendChild(tr);
-    });
-  }
-
-  inputData.addEventListener('change', function () {
-    const dataSelezionata = this.value;
-    const prenotazioni = JSON.parse(localStorage.getItem('prenotazioni')) || { prenotazioni: [] };
-    const orariDisponibili = ['19:00', '19:30', '20:00', '20:30', '21:00', '21:30'];
-
-    inputOra.innerHTML = '';
-    orariDisponibili.forEach(ora => {
-      const option = document.createElement('option');
-      option.value = ora;
-      option.textContent = ora;
-      inputOra.appendChild(option);
-    });
-  });
-
-  caricaCalendario();
+  // Initial update of reservation section based on login status
+  updateReservationSection();
 }
 
 // Mappa le funzioni ai target

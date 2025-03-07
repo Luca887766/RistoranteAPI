@@ -898,3 +898,159 @@ footer iframe.map {
   border: none;
   border-radius: 1rem;
 }
+
+/* Login/Register Styles */
+#login-register-container {
+  width: 400px;
+  margin: 2rem auto;
+  position: relative;
+  overflow: hidden;
+  border-radius: 1rem;
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1);
+}
+
+#slider {
+  width: 200px;
+  height: 40px;
+  background-color: #270514;
+  position: absolute;
+  top: 0;
+  left: 0;
+  border-radius: 1rem 0 0 1rem;
+  transition: left 0.3s ease;
+}
+
+.login-box,
+.register-box {
+  width: 100%;
+  padding: 2rem;
+  box-sizing: border-box;
+}
+
+.login-box {
+  text-align: left;
+}
+
+.register-box {
+  text-align: left;
+}
+
+.login-box h2,
+.register-box h2 {
+  text-align: center;
+  margin-bottom: 1.5rem;
+  color: #333;
+}
+
+.input-group {
+  margin-bottom: 1.5rem;
+}
+
+.input-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: #333;
+}
+
+.input-group input {
+  width: 100%;
+  padding: 0.75rem;
+  font-size: 1em;
+  border: 1px solid #ddd;
+  border-radius: 0.5rem;
+  transition: border-color 0.3s ease;
+  box-sizing: border-box;
+}
+
+.login-box button,
+.register-box button {
+  padding: 1rem;
+  font-size: 1.2em;
+  color: white;
+  background-color: #270514;
+  border: none;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.login-box button:hover,
+.register-box button:hover {
+  background-color: #4b0925;
+}
+
+/* Admin Styles */
+#admin-reservations {
+  padding: 2rem;
+  background-color: #f9f9f9;
+  border-radius: 1rem;
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1);
+  margin: 2rem auto;
+  max-width: 800px;
+}
+
+#reservations-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+}
+
+#reservations-table th,
+#reservations-table td {
+  padding: 1rem;
+  border: 1px solid #ddd;
+  text-align: left;
+}
+
+#reservations-table th {
+  background-color: #270514;
+  color: white;
+}
+
+/* Reservation Form Styles */
+#reservation-form-container {
+  max-width: 50rem;
+  padding: 2rem;
+  background-color: #f9f9f9;
+  border-radius: 1rem;
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1);
+  margin: 0 auto;
+}
+
+#reservation-form .form-row {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 1.5rem;
+}
+
+#reservation-form .form-row label {
+  font-size: 1.1em;
+  color: #333;
+  margin-bottom: 0.5rem;
+}
+
+#reservation-form .form-row input,
+#reservation-form .form-row select {
+  padding: 0.75rem;
+  font-size: 1em;
+  border: 1px solid #ddd;
+  border-radius: 0.5rem;
+  transition: border-color 0.3s ease;
+}
+
+#reservation-form button {
+  padding: 1rem;
+  font-size: 1.2em;
+  color: white;
+  background-color: #270514;
+  border: none;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+#reservation-form button:hover {
+  background-color: #4b0925;
+}
