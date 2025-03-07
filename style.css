@@ -906,6 +906,8 @@ footer iframe.map {
   margin: 100px auto;
   box-shadow: 0 0 20px 9px #ff539d31;
   border-radius: 30px;
+  overflow: hidden; /* Ensure content doesn't overflow */
+  position: relative;
 }
 
 .button-box {
@@ -941,10 +943,12 @@ footer iframe.map {
   position: absolute;
   width: 280px;
   transition: .3s;
+  padding: 0 20px; /* Add padding to contain input fields */
+  box-sizing: border-box; /* Include padding in width calculation */
 }
 
 .input-field {
-  width: 220px;
+  width: 100%; /* Expand input fields to fill container */
   padding: 10px 0;
   margin: 5px 0;
   border-left: 0;
@@ -953,6 +957,7 @@ footer iframe.map {
   border-bottom: 1px solid #999;
   outline: none;
   background: transparent;
+  box-sizing: border-box; /* Include padding in width calculation */
 }
 
 .submit-btn {
@@ -979,7 +984,7 @@ span {
 }
 
 #register-form {
-  left: 330px;
+  left: 450px; /* Shift register form further to the right */
 }
 
 #login-register-container {
