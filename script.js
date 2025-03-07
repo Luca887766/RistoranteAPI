@@ -367,6 +367,7 @@ function caricaPrenotazioni() {
   });
 
   // Initial update of reservation section based on login status
+  login(); // Ensure login form is visible by default
   updateReservationSection();
 }
 
