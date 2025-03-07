@@ -922,6 +922,7 @@ footer iframe.map {
   position: relative;
   box-shadow: 0 0 20px 9px #ff539d31;
   border-radius: 30px;
+  z-index: 1; /* Ensure buttons are above the forms */
 }
 
 .toggle-btn {
@@ -949,10 +950,12 @@ footer iframe.map {
   position: absolute;
   width: 280px;
   transition: .3s;
+  padding: 0 20px;
+  box-sizing: border-box;
 }
 
 .input-field {
-  width: 220px;
+  width: 100%;
   padding: 10px 0;
   margin: 5px 0;
   border-left: 0;
@@ -961,6 +964,7 @@ footer iframe.map {
   border-bottom: 1px solid #999;
   outline: none;
   background: transparent;
+  box-sizing: border-box;
 }
 
 .submit-btn {
@@ -987,6 +991,40 @@ footer iframe.map {
 #login-form,
 #register-form {
   display: inline-block;
+}
+
+/* Ensure forms take up the full width and are positioned correctly */
+#login-form,
+#register-form {
+  position: absolute;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0 20px;
+}
+
+#login-form {
+  left: 0;
+}
+
+#register-form {
+  left: 100%;
+}
+
+.form-container {
+  position: relative;
+  width: 560px; /* Double the width of a single form */
+  height: auto;
+  transition: transform 0.3s ease-in-out;
+}
+
+#login-register-container {
+  width: 280px;
+  height: auto;
+  margin: 100px auto;
+  box-shadow: 0 0 20px 9px #ff539d31;
+  border-radius: 30px;
+  overflow: hidden;
+  position: relative;
 }
 
 /* Admin Styles */
