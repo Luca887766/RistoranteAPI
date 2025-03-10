@@ -910,89 +910,109 @@ footer iframe.map {
   position: relative;
 }
 
-.form-container {
-  width: 20rem;
-  height: auto;
-  position: relative;
+#login-register-wrapper {
+  max-width: 20rem;
+  margin: 2rem auto;
+  background-color: #fff;
+  padding: 1.5rem;
+  border-radius: 0.5rem;
 }
 
-.button-box {
-  width: 13.75rem;
-  margin: 1rem auto; /* Reduced margin */
-  position: relative;
-  box-shadow: 0 0 1.25rem 0.5625rem #ff539d31;
-  border-radius: 1.875rem;
-  z-index: 1;
+.form-toggle {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
 }
 
-.toggle-btn {
-  padding: 0.625rem 1.875rem;
-  cursor: pointer;
-  background: transparent;
-  border: 0;
-  outline: none;
-  position: relative;
-}
-
-#btn {
-  top: 0;
-  left: 0;
-  position: absolute;
-  width: 6.875rem;
-  height: 100%;
-  background: #270514;
-  border-radius: 1.875rem;
-  transition: .3s;
-}
-
-.input-group {
-  width: 100%; /* Take full width */
-  padding: 1.25rem;
-  box-sizing: border-box;
-  transition: opacity 0.5s ease-in-out;
-  position: relative; /* Remove absolute positioning */
-}
-
-.input-field {
-  width: 100%;
-  padding: 0.625rem;
-  margin: 0.3125rem 0;
-  border: 0.0625rem solid #ccc;
-  border-radius: 0.25rem;
-  box-sizing: border-box;
-  display: block; /* Ensure input fields are block-level elements */
-}
-
-.submit-btn {
-  width: 100%;
-  padding: 0.625rem;
-  background-color: #270514;
-  color: white;
+.form-toggle button {
+  flex: 1;
+  padding: 0.5rem;
   border: none;
-  border-radius: 0.25rem;
+  background-color: #f0f0f0;
   cursor: pointer;
-  margin-top: 0.625rem; /* Reduced margin */
+  transition: background-color 0.3s ease;
+}
+
+.form-toggle button.active {
+  background-color: #ddd;
 }
 
 #login-form,
 #register-form {
-  width: 100%;
-  box-sizing: border-box;
-  padding: 0 1.25rem;
-  position: relative;
-  top: 0; /* Position below button box */
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
 }
 
-/* Initially hide the register form */
+.error-message {
+  color: red;
+  margin-top: 0.5rem;
+}
+
+.auth-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 80vh;
+  padding: 2rem;
+}
+
+#login-register-container {
+  background-color: #fff;
+  border-radius: 0.75rem;
+  box-shadow: 0 0 1rem rgba(0, 0, 0, 0.1);
+  width: 22rem;
+  padding: 2rem;
+}
+
+#login-register-container form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+#login-register-container .form-row {
+  display: flex;
+  flex-direction: column;
+}
+
+#login-register-container label {
+  margin-bottom: 0.25rem;
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: #555;
+}
+
+#login-register-container input {
+  padding: 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 0.25rem;
+}
+
+#login-register-container button {
+  border: none;
+  border-radius: 0.25rem;
+  padding: 0.75rem;
+  background-color: #4285f4;
+  color: #fff;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+#login-register-container button:hover {
+  background-color: #357ae8;
+}
+
+.error-message {
+  color: #d93025;
+  font-size: 0.8rem;
+  min-height: 1rem;
+  margin-top: -0.25rem;
+}
+
 #register-form {
-  opacity: 0;
   display: none;
-}
-
-/* Class to show the form with fade-in effect */
-.fade-in {
-  opacity: 1;
-  display: block;
 }
 
 /* Admin Styles */
@@ -1067,103 +1087,4 @@ footer iframe.map {
 
 #reservation-form button:hover {
   background-color: #4b0925;
-}
-
-#login-register-wrapper {
-  max-width: 20rem;
-  margin: 2rem auto;
-  background-color: #fff;
-  padding: 1.5rem;
-  border-radius: 0.5rem;
-}
-
-.form-toggle {
-  display: flex;
-  gap: 1rem;
-  margin-bottom: 1rem;
-}
-
-.form-toggle button {
-  flex: 1;
-  padding: 0.5rem;
-  border: none;
-  background-color: #f0f0f0;
-  cursor: pointer;
-}
-
-.form-toggle button.active {
-  background-color: #ddd;
-}
-
-#login-form, #register-form {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.error-message {
-  color: red;
-  margin-top: 0.5rem;
-}
-
-.auth-container {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 80vh;
-  padding: 2rem;
-}
-
-#login-register-container {
-  background-color: #fff;
-  border-radius: 0.75rem;
-  box-shadow: 0 0 1rem rgba(0, 0, 0, 0.1);
-  width: 22rem;
-  padding: 2rem;
-}
-
-#login-register-container form {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-#login-register-container .form-row {
-  display: flex;
-  flex-direction: column;
-}
-
-#login-register-container label {
-  margin-bottom: 0.25rem;
-  font-weight: 600;
-  font-size: 0.9rem;
-  color: #555;
-}
-
-#login-register-container input {
-  padding: 0.5rem;
-  border: 1px solid #ccc;
-  border-radius: 0.25rem;
-}
-
-#login-register-container button {
-  border: none;
-  border-radius: 0.25rem;
-  padding: 0.75rem;
-  background-color: #4285f4;
-  color: #fff;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-}
-
-#login-register-container button:hover {
-  background-color: #357ae8;
-}
-
-.error-message {
-  color: #d93025;
-  font-size: 0.8rem;
-  min-height: 1rem;
-  margin-top: -0.25rem;
 }
