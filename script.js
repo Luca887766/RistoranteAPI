@@ -130,6 +130,11 @@ function initializeReservationForm() {
     const formattedDate = today.toISOString().split('T')[0];
     dateInput.min = formattedDate;
     
+    // Set default date to today only if not coming from an event booking
+    if (!sessionStorage.getItem('eventToBook')) {
+      dateInput.value = formattedDate;
+    }
+    
     // Set maximum date to 3 months from now
     const maxDate = new Date();
     maxDate.setMonth(maxDate.getMonth() + 3);
@@ -151,6 +156,15 @@ function initializeReservationForm() {
       }
     });
   }
+  
+  // Set the default name to username if logged in
+  const nomeInput = document.getElementById('nome');
+  if (nomeInput) {
+    const username = localStorage.getItem('username');
+    if (username) {
+      nomeInput.value = username;
+    }
+  }
 }
 
 // Check date availability
@@ -163,10 +177,10 @@ function checkDateAvailability(event) {
     .then(data => {
       if (data.error) {
         if (error) error.textContent = data.error;
-        event.target.value = ''; // Clear the date input
+        event.target.value = '';
       } else if (data.available === false) {
         if (error) error.textContent = 'Il ristorante è al completo per questa data. Scegli un\'altra data.';
-        event.target.value = ''; // Clear the date input
+        event.target.value = '';
       } else {
         if (error) error.textContent = '';
       }
@@ -726,13 +740,13 @@ function fillReservationFormWithEventData(evento) {
   if (nomeInput && dataInput) {
     // Set the name to username instead of event name
     const username = localStorage.getItem('username');
-    nomeInput.value = username || ''; // Use username if available
+    nomeInput.value = username || '';
     
     // Set the date to event date
     dataInput.value = evento.data;
     
     // Default to 2 people if not set already
-    if (personeInput && (!personeInput.value || personeInput.value === "0")) {
+    if (personeInput) {
       personeInput.value = 2;
     }
     
@@ -1202,6 +1216,19 @@ document.addEventListener('DOMContentLoaded', () => {
         l2.classList.remove('selected');
       });
       a.classList.add('selected');
+      
+      // Scroll to content with offset for navigation bars
+      setTimeout(() => {
+        const contentElement = document.getElementById(idSezione);
+        if (contentElement) {
+          const offset = 120; // Adjust this value based on your navigation bars' height
+          const topPosition = contentElement.getBoundingClientRect().top + window.scrollY - offset;
+          window.scrollTo({
+            top: topPosition,
+            behavior: 'smooth'
+          });
+        }
+      }, 350); // Small delay to ensure transition has started
     });
   });
 
