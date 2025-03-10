@@ -99,43 +99,43 @@
         <button id="client-logout" class="logout-btn">Logout</button>
       </div>
 
-      <!-- Login/Register Area -->
+      <!-- Auth Container -->
       <div class="auth-container" style="display: none;">
         <div id="login-register-container">
-          <div id="login-register-wrapper">
-            <div class="form-toggle" data-active="login">
-              <button id="login-tab" class="active">Login</button>
-              <button id="register-tab">Register</button>
-            </div>
-            <form id="login-form">
-              <div class="form-row">
-                <label for="login-username">Username</label>
-                <input type="text" id="login-username" placeholder="Inserisci username" required>
-              </div>
-              <div class="form-row">
-                <label for="login-password">Password</label>
-                <input type="password" id="login-password" placeholder="Inserisci password" required>
-              </div>
-              <div id="login-error" class="error-message"></div>
-              <button type="submit">Login</button>
-            </form>
-            <form id="register-form">
-              <div class="form-row">
-                <label for="register-username">Username</label>
-                <input type="text" id="register-username" placeholder="Scegli username" required>
-              </div>
-              <div class="form-row">
-                <label for="register-password">Password</label>
-                <input type="password" id="register-password" placeholder="Scegli password" required>
-              </div>
-              <div class="form-row">
-                <label for="register-confirm-password">Conferma Password</label>
-                <input type="password" id="register-confirm-password" placeholder="Conferma password" required>
-              </div>
-              <div id="register-error" class="error-message"></div>
-              <button type="submit">Registrati</button>
-            </form>
+          <div class="form-toggle" data-active="login">
+            <button id="login-tab" class="active">Login</button>
+            <button id="register-tab">Register</button>
           </div>
+          
+          <form id="login-form">
+            <div class="form-row">
+              <label for="login-username">Username</label>
+              <input type="text" id="login-username" placeholder="Inserisci username" required>
+            </div>
+            <div class="form-row">
+              <label for="login-password">Password</label>
+              <input type="password" id="login-password" placeholder="Inserisci password" required>
+            </div>
+            <div id="login-error" class="error-message"></div>
+            <button type="submit" class="auth-button">Login</button>
+          </form>
+
+          <form id="register-form">
+            <div class="form-row">
+              <label for="register-username">Username</label>
+              <input type="text" id="register-username" placeholder="Scegli username" required>
+            </div>
+            <div class="form-row">
+              <label for="register-password">Password</label>
+              <input type="password" id="register-password" placeholder="Scegli password" required>
+            </div>
+            <div class="form-row">
+              <label for="register-confirm-password">Conferma Password</label>
+              <input type="password" id="register-confirm-password" placeholder="Conferma password" required>
+            </div>
+            <div id="register-error" class="error-message"></div>
+            <button type="submit" class="auth-button">Registrati</button>
+          </form>
         </div>
       </div>
     </div>
