@@ -1043,6 +1043,25 @@ footer iframe.map {
   outline: none;
 }
 
+/* Login/Register Submit Button Styling - Updated */
+#login-form button[type="submit"],
+#register-form button[type="submit"] {
+  padding: 1rem;
+  font-size: 1.2em;
+  color: #200514;
+  background-color: #ffdeec;
+  border: none;
+  /* border-radius: 0.5rem; */
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  margin-top: 0.5rem;
+}
+
+#login-form button[type="submit"]:hover,
+#register-form button[type="submit"]:hover {
+  background-color: #ffcee3;
+}
+
 #login-form button[type="submit"],
 #register-form button[type="submit"] {
   padding: 1rem;
@@ -1058,7 +1077,7 @@ footer iframe.map {
 
 #login-form button[type="submit"]:hover,
 #register-form button[type="submit"]:hover {
-  background-color: #4b0925;
+  background-color: #ce1a65;
 }
 
 .error-message {
