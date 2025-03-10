@@ -26,7 +26,6 @@ function mostraSezione(idSezione) {
         sezioneAttiva.classList.add('fade-in');
       }, 50);
       
-      // Only show auth container when prenotazioni section is active and user is not logged in
       if (idSezione === 'prenotazioni') {
         const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
         const authContainer = document.querySelector('.auth-container');
@@ -36,7 +35,6 @@ function mostraSezione(idSezione) {
         
         updateReservationSection();
       } else {
-        // Hide auth container when not in prenotazioni section
         const authContainer = document.querySelector('.auth-container');
         if (authContainer) {
           authContainer.style.display = 'none';
