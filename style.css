@@ -600,7 +600,7 @@ p {
   border-radius: 0.3rem;
   transition: all 0.3s ease;
   box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
-  overflow: hidden;
+  overflow: visible;
 }
 
 .book-event-btn:hover {
@@ -627,12 +627,46 @@ p {
 
 @keyframes fall {
   0% {
-    opacity: 1;
     transform: translate(0, 0) rotate(0deg);
+    opacity: 1;
   }
   100% {
-    opacity: 0;
     transform: translate(var(--tx), var(--ty)) rotate(360deg);
+    opacity: 0;
+  }
+}
+
+/* Button stars container */
+.stars-container {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  overflow: visible;
+  pointer-events: none;
+}
+
+/* Star in button */
+.button-star {
+  position: absolute;
+  width: 2px;
+  height: 2px;
+  background-color: #fff;
+  border-radius: 50%;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Animation for continuously falling stars */
+@keyframes continuous-fall {
+  0% {
+    transform: translate(0, 0);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(var(--tx), var(--ty));
+    opacity: 0;
   }
 }
 

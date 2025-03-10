@@ -685,7 +685,7 @@ function caricaEventi() {
       bookButton.innerText = 'Prenota';
       bookButton.addEventListener('click', (e) => {
         e.stopPropagation(); // Prevent event bubbling
-        prenotaEvento(evento);
+        prenotaEvento(evento, e);
       });
       eventoDiv.appendChild(bookButton);
 
@@ -707,13 +707,17 @@ function caricaEventi() {
 
     // Aggiungi la galleria di eventi alla sezione
     eventiDiv.appendChild(galleriaDiv);
+    
+    // Setup continuous stars effect after all buttons are created
+    setupContinuousStars();
   });
 }
 
 // Function to handle booking event
-function prenotaEvento(evento) {
-  // Create star animation effect
-  createStars(event);
+function prenotaEvento(evento, e) {
+  // Create star animation effect from the specific button
+  const buttonElement = e.currentTarget;
+  createStars(buttonElement);
   
   // Store event data in session storage
   sessionStorage.setItem('eventToBook', JSON.stringify(evento));
@@ -735,16 +739,13 @@ function prenotaEvento(evento) {
 }
 
 // Function to create falling star animation
-function createStars(event) {
-  const button = event.currentTarget;
+function createStars(button) {
   const rect = button.getBoundingClientRect();
-  const buttonCenter = {
-    x: rect.left + rect.width / 2,
-    y: rect.top + rect.height / 2
-  };
+  const buttonWidth = rect.width;
+  const buttonHeight = rect.height;
   
   // Create multiple stars
-  for (let i = 0; i < 20; i++) {
+  for (let i = 0; i < 15; i++) {
     setTimeout(() => {
       const star = document.createElement('div');
       star.classList.add('star');
@@ -759,15 +760,17 @@ function createStars(event) {
       star.style.width = `${size}px`;
       star.style.height = `${size}px`;
       
-      // Set initial position at button center
-      star.style.left = `${buttonCenter.x}px`;
-      star.style.top = `${buttonCenter.y}px`;
+      // Set initial position at random point in the button
+      const startX = rect.left + Math.random() * buttonWidth;
+      const startY = rect.top + Math.random() * buttonHeight;
+      star.style.left = `${startX}px`;
+      star.style.top = `${startY}px`;
       
       // Set random direction for falling
-      const angle = Math.random() * Math.PI * 2;
+      const angle = Math.random() * Math.PI / 2 + Math.PI / 4; // Ensure downward direction (between 45° and 135°)
       const distance = Math.random() * 100 + 50;
       const tx = Math.cos(angle) * distance;
-      const ty = Math.sin(angle) * distance + distance/2; // Bias downward
+      const ty = Math.sin(angle) * distance;
       
       star.style.setProperty('--tx', `${tx}px`);
       star.style.setProperty('--ty', `${ty}px`);
@@ -786,6 +789,87 @@ function createStars(event) {
       }, 1500);
     }, i * 50); // Stagger the creation of stars
   }
+}
+
+// Setup continuous star falling effect for event buttons
+function setupContinuousStars() {
+  const buttons = document.querySelectorAll('.book-event-btn');
+  
+  buttons.forEach(button => {
+    // Create stars container for this button
+    const starsContainer = document.createElement('div');
+    starsContainer.classList.add('stars-container');
+    button.appendChild(starsContainer);
+    
+    // Function to create and animate a single star
+    function createContinuousStar() {
+      if (!document.body.contains(button)) return; // Stop if button no longer exists
+      
+      const rect = button.getBoundingClientRect();
+      if (rect.width === 0) return; // Skip if button not visible
+      
+      // Create star
+      const star = document.createElement('div');
+      star.classList.add('button-star');
+      
+      // Random star properties
+      const size = Math.random() * 3 + 1;
+      star.style.width = `${size}px`;
+      star.style.height = `${size}px`;
+      
+      // Random starting position within button
+      const startX = Math.random() * 100;
+      const startY = Math.random() * 100;
+      star.style.left = `${startX}%`;
+      star.style.top = `${startY}%`;
+      
+      // Random color
+      const colors = ['#FFFFFF', '#FFD700', '#FFFACD', '#FFFFE0'];
+      star.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+      
+      // Random fall direction and distance
+      const angle = Math.random() * Math.PI / 2 + Math.PI / 4; // 45° to 135°
+      const distance = 50 + Math.random() * 100;
+      const tx = Math.cos(angle) * distance;
+      const ty = Math.sin(angle) * distance;
+      
+      star.style.setProperty('--tx', `${tx}px`);
+      star.style.setProperty('--ty', `${ty}px`);
+      
+      // Add to container
+      starsContainer.appendChild(star);
+      
+      // Start animation
+      const duration = 0.5 + Math.random() * 1;
+      star.style.animation = `continuous-fall ${duration}s linear forwards`;
+      
+      // Remove after animation
+      setTimeout(() => {
+        if (star && star.parentNode) {
+          star.parentNode.removeChild(star);
+        }
+      }, duration * 1000);
+    }
+    
+    // Create stars at random intervals when hovering
+    let starInterval = null;
+    
+    button.addEventListener('mouseenter', () => {
+      // Initial burst of stars
+      for (let i = 0; i < 5; i++) {
+        setTimeout(createContinuousStar, i * 100);
+      }
+      
+      // Continue creating stars at random intervals
+      starInterval = setInterval(() => {
+        if (Math.random() < 0.5) createContinuousStar();
+      }, 200);
+    });
+    
+    button.addEventListener('mouseleave', () => {
+      clearInterval(starInterval);
+    });
+  });
 }
 
 // CHEF FUNCTIONS
@@ -1251,7 +1335,7 @@ document.addEventListener('DOMContentLoaded', () => {
       setTimeout(() => {
         const contentElement = document.getElementById(idSezione);
         if (contentElement) {
-          const offset = 64;
+          const offset = 128;
           const topPosition = contentElement.getBoundingClientRect().top + window.scrollY - offset;
           window.scrollTo({
             top: topPosition,
@@ -1296,5 +1380,28 @@ document.addEventListener('DOMContentLoaded', function() {
     } else {
       secondNavBar.classList.remove('scroll-start');
     }
+  });
+});
+
+// Add a mutation observer to handle dynamically added buttons
+document.addEventListener('DOMContentLoaded', function() {
+  // Setup existing DOM content first
+  
+  // Create a MutationObserver to detect when event buttons are added
+  const observer = new MutationObserver(function(mutations) {
+    mutations.forEach(function(mutation) {
+      if (mutation.addedNodes.length) {
+        const newButtons = document.querySelectorAll('.book-event-btn:not(.stars-initialized)');
+        if (newButtons.length > 0) {
+          setupContinuousStars();
+          newButtons.forEach(btn => btn.classList.add('stars-initialized'));
+        }
+      }
+    });
+  });
+  
+  observer.observe(document.body, { 
+    childList: true,
+    subtree: true
   });
 });
