@@ -4,6 +4,10 @@ header('Content-Type: application/json');
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Headers: Content-Type");
 
+// Enable error reporting for debugging (remove in production)
+ini_set('display_errors', 1);
+error_reporting(E_ALL);
+
 $db_host = 'localhost';
 $db_user = 'root';
 $db_pass = '';
@@ -17,9 +21,34 @@ if ($conn->connect_error) {
     die(json_encode(['error' => 'Database connection failed: ' . $conn->connect_error]));
 }
 
+// Create users table if not exists
+$sql = "CREATE TABLE IF NOT EXISTS users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(50) UNIQUE NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+)";
+
 if ($conn->query($sql) !== TRUE) {
-    echo json_encode(['error' => 'Error creating table: ' . $conn->error]);
+    echo json_encode(['error' => 'Error creating users table: ' . $conn->error]);
     exit;
+}
+
+// Create reservations table if not exists
+$sql = "CREATE TABLE IF NOT EXISTS reservations (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    nome_cliente VARCHAR(100) NOT NULL,
+    data DATE NOT NULL,
+    ora TIME NOT NULL,
+    persone INT NOT NULL,
+    contatto VARCHAR(100) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id)
+)";
+
+if ($conn->query($sql) !== TRUE) {
+    echo json_encode(['error' => 'Error creating reservations table: ' . $conn->error]);
 }
 
 session_start();
@@ -27,7 +56,7 @@ session_start();
 $action = isset($_GET['action']) ? $_GET['action'] : '';
 
 // Log received action
-error_log("Received action: " . $action);
+error_log("API action received: " . $action);
 
 switch ($action) {
     case 'register':
@@ -62,16 +91,9 @@ switch ($action) {
 }
 
 function registerUser($conn) {
-    // Log registration attempt
-    error_log("Registration attempt received");
-    
     // Get POST data
     $username = isset($_POST['username']) ? $_POST['username'] : null;
     $password = isset($_POST['password']) ? $_POST['password'] : null;
-    
-    // Log received data (don't do this in production)
-    error_log("Username: " . $username);
-    error_log("Password received: " . ($password ? "Yes" : "No"));
     
     if (!$username || !$password) {
         echo json_encode(['error' => 'Missing required fields']);
@@ -118,9 +140,6 @@ function registerUser($conn) {
 }
 
 function loginUser($conn) {
-    // Log login attempt
-    error_log("Login attempt received");
-    
     $username = isset($_POST['username']) ? $_POST['username'] : null;
     $password = isset($_POST['password']) ? $_POST['password'] : null;
     
@@ -164,11 +183,11 @@ function createReservation($conn) {
         return;
     }
 
-    $nome_cliente = $_POST['nome'];
-    $data = $_POST['data'];
-    $ora = $_POST['ora'];
-    $persone = intval($_POST['persone']);
-    $contatto = $_POST['contatto'];
+    $nome_cliente = $_POST['nome'] ?? '';
+    $data = $_POST['data'] ?? '';
+    $ora = $_POST['ora'] ?? '';
+    $persone = isset($_POST['persone']) ? intval($_POST['persone']) : 0;
+    $contatto = $_POST['contatto'] ?? '';
     $user_id = $_SESSION['user_id'];
 
     // Validate inputs
@@ -202,8 +221,10 @@ function getReservations($conn) {
     $result = $conn->query($sql);
 
     $reservations = [];
-    while ($row = $result->fetch_assoc()) {
-        $reservations[] = $row;
+    if ($result) {
+        while ($row = $result->fetch_assoc()) {
+            $reservations[] = $row;
+        }
     }
 
     echo json_encode($reservations);
@@ -269,11 +290,11 @@ function updateReservation($conn) {
     }
     
     $id = isset($_POST['id']) ? intval($_POST['id']) : 0;
-    $nome_cliente = $_POST['nome_cliente'];
-    $data = $_POST['data'];
-    $ora = $_POST['ora'];
-    $persone = intval($_POST['persone']);
-    $contatto = $_POST['contatto'];
+    $nome_cliente = $_POST['nome_cliente'] ?? '';
+    $data = $_POST['data'] ?? '';
+    $ora = $_POST['ora'] ?? '';
+    $persone = isset($_POST['persone']) ? intval($_POST['persone']) : 0;
+    $contatto = $_POST['contatto'] ?? '';
     
     // Check if the user is admin or the owner of the reservation
     if ($_SESSION['username'] === 'admin') {
