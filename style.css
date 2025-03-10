@@ -1043,7 +1043,6 @@ footer iframe.map {
   outline: none;
 }
 
-/* Login/Register Submit Button Styling */
 #login-form button[type="submit"],
 #register-form button[type="submit"] {
   padding: 1rem;
