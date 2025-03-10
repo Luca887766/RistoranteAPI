@@ -531,6 +531,33 @@ function setupLogout() {
         localStorage.removeItem('isLoggedIn');
         localStorage.removeItem('username');
         showToast('Logout effettuato con successo', 'success');
+        
+        // Reset all forms in the document
+        document.querySelectorAll('form').forEach(form => {
+          form.reset();
+        });
+        
+        // Clear specific reservation fields
+        const formFields = ['nome', 'data', 'ora', 'persone', 'contatto'];
+        formFields.forEach(field => {
+          const element = document.getElementById(field);
+          if (element) element.value = '';
+        });
+        
+        // Scroll to top
+        window.scrollTo({
+          top: 0,
+          behavior: 'smooth'
+        });
+        
+        // Return to home section
+        document.querySelectorAll('#SecondaBarraOrizzontale a').forEach(link => {
+          link.classList.remove('selected');
+        });
+        document.querySelector('#SecondaBarraOrizzontale a[data-target="menu-giornaliero"]').classList.add('selected');
+        mostraSezione('menu-giornaliero');
+        
+        // Update reservation section UI state
         updateReservationSection();
       })
       .catch(error => console.error('Error during logout:', error));
