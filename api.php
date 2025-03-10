@@ -175,21 +175,31 @@ function createReservation($conn) {
         return;
     }
     
+    // Check if there's enough space during this time slot
+    $bookingStart = $ora;
+    $bookingEnd = date('H:i', strtotime($ora) + 5400);
+    
     $stmt = $conn->prepare("
         SELECT SUM(persone) as total FROM reservations 
-        WHERE data = ? AND 
-        ((ora <= ? AND ADDTIME(ora, '01:30:00') > ?) OR
-         (ora < ADDTIME(?, '01:30:00') AND ora >= ?))
+        WHERE data = ? AND (
+            -- Existing reservation starts during our booking
+            (ora >= ? AND ora < ?) OR
+            -- Existing reservation ends during our booking
+            (ADDTIME(ora, '01:30:00') > ? AND ADDTIME(ora, '01:30:00') <= ?) OR
+            -- Existing reservation completely overlaps our booking
+            (ora <= ? AND ADDTIME(ora, '01:30:00') >= ?)
+        )
     ");
-    $endTime = date('H:i', strtotime($ora) + 5400); // 1.5 hours = 5400 seconds
-    $stmt->bind_param("sssss", $data, $ora, $endTime, $ora, $ora);
+    $stmt->bind_param("sssssss", $data, $bookingStart, $bookingEnd, $bookingStart, $bookingEnd, $bookingStart, $bookingEnd);
     $stmt->execute();
     $result = $stmt->get_result();
     $row = $result->fetch_assoc();
-    $currentOccupancy = $row['total'] ?? 0;
+    $currentOccupancy = $row['total'] ? (int)$row['total'] : 0;
     $stmt->close();
     
-    if ($currentOccupancy + $persone > 50) {
+    $maxCapacity = 50;
+    
+    if ($currentOccupancy + $persone > $maxCapacity) {
         echo json_encode(['error' => 'Non c\'è disponibilità per questo orario e numero di persone']);
         return;
     }
@@ -360,18 +370,49 @@ function checkDateAvailability($conn) {
         return;
     }
     
-    $stmt = $conn->prepare("SELECT SUM(persone) as total FROM reservations WHERE data = ?");
-    $stmt->bind_param("s", $date);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    $row = $result->fetch_assoc();
-    $total = $row['total'] ? (int)$row['total'] : 0;
-    $stmt->close();
+    // Get all time slots for the restaurant (from 19:00 to 22:00)
+    $timeSlots = ['19:00', '19:30', '20:00', '20:30', '21:00', '21:30', '22:00'];
+    $maxCapacity = 50; // Restaurant capacity
     
-    if ($total >= 50) {
+    // Check each time slot separately to find if any is fully available
+    $availableSlots = [];
+    
+    foreach ($timeSlots as $timeSlot) {
+        // Get reservations that overlap with this time slot
+        $stmt = $conn->prepare("
+            SELECT SUM(persone) as total FROM reservations 
+            WHERE data = ? AND (
+                (ora <= ? AND ADDTIME(ora, '01:30:00') > ?) OR
+                (ora < ADDTIME(?, '01:30:00') AND ora >= ?)
+            )
+        ");
+        $endTime = date('H:i', strtotime($timeSlot) + 5400); // 1.5 hours = 5400 seconds
+        $stmt->bind_param("sssss", $date, $timeSlot, $endTime, $timeSlot, $timeSlot);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $row = $result->fetch_assoc();
+        $occupancy = $row['total'] ? (int)$row['total'] : 0;
+        $stmt->close();
+        
+        $availableSlots[$timeSlot] = $maxCapacity - $occupancy;
+    }
+    
+    // If all time slots are fully booked, return not available
+    $allFull = true;
+    foreach ($availableSlots as $available) {
+        if ($available > 0) {
+            $allFull = false;
+            break;
+        }
+    }
+    
+    if ($allFull) {
         echo json_encode(['available' => false]);
     } else {
-        echo json_encode(['available' => true, 'remaining' => 50 - $total]);
+        echo json_encode([
+            'available' => true, 
+            'availableSlots' => $availableSlots
+        ]);
     }
 }
 
@@ -390,49 +431,43 @@ function checkTimeSlotAvailability($conn) {
         return;
     }
     
-    $stmt = $conn->prepare("SELECT SUM(persone) as total FROM reservations WHERE data = ?");
-    $stmt->bind_param("s", $date);
+    // Get all reservations that would overlap with the requested time slot
+    $bookingStart = $time;
+    $bookingEnd = date('H:i', strtotime($time) + 5400); // Add 90 minutes (1.5 hours)
+    
+    $stmt = $conn->prepare("
+        SELECT SUM(persone) as total FROM reservations 
+        WHERE data = ? AND (
+            -- Existing reservation starts during our booking
+            (ora >= ? AND ora < ?) OR
+            -- Existing reservation ends during our booking
+            (ADDTIME(ora, '01:30:00') > ? AND ADDTIME(ora, '01:30:00') <= ?) OR
+            -- Existing reservation completely overlaps our booking
+            (ora <= ? AND ADDTIME(ora, '01:30:00') >= ?)
+        )
+    ");
+    $stmt->bind_param("sssssss", $date, $bookingStart, $bookingEnd, $bookingStart, $bookingEnd, $bookingStart, $bookingEnd);
     $stmt->execute();
     $result = $stmt->get_result();
     $row = $result->fetch_assoc();
-    $totalForDay = $row['total'] ? (int)$row['total'] : 0;
+    $currentOccupancy = $row['total'] ? (int)$row['total'] : 0;
     $stmt->close();
     
-    if ($totalForDay + $persone > 50) {
-        echo json_encode(['available' => false, 'error' => 'Superato il limite giornaliero di 50 persone']);
-        return;
-    }
+    $maxCapacity = 50; // Restaurant capacity
     
-    $bookingTime = strtotime($time);
-    $bookingEndTime = date('H:i', strtotime('+90 minutes', $bookingTime));
-    
-    $stmt = $conn->prepare("
-        SELECT id, ora, persone, 
-        ADDTIME(ora, '01:30:00') as end_time
-        FROM reservations 
-        WHERE data = ?
-    ");
-    $stmt->bind_param("s", $date);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    
-    $currentOccupancy = 0;
-    while ($row = $result->fetch_assoc()) {
-        $reservationStart = strtotime($row['ora']);
-        $reservationEnd = strtotime($row['end_time']);
-        
-        if (($bookingTime >= $reservationStart && $bookingTime < $reservationEnd) ||
-            (strtotime($bookingEndTime) > $reservationStart && strtotime($bookingEndTime) <= $reservationEnd) ||
-            ($bookingTime <= $reservationStart && strtotime($bookingEndTime) >= $reservationEnd)) {
-            $currentOccupancy += (int)$row['persone'];
-        }
-    }
-    $stmt->close();
-    
-    if ($currentOccupancy + $persone > 50) {
-        echo json_encode(['available' => false, 'error' => 'Non c\'è disponibilità per questo orario']);
+    if ($currentOccupancy + $persone > $maxCapacity) {
+        echo json_encode([
+            'available' => false, 
+            'error' => 'Non c\'è disponibilità per questo orario',
+            'currentOccupancy' => $currentOccupancy,
+            'requestedSeats' => $persone
+        ]);
     } else {
-        echo json_encode(['available' => true, 'remaining' => 50 - $currentOccupancy - $persone]);
+        echo json_encode([
+            'available' => true, 
+            'remaining' => $maxCapacity - $currentOccupancy - $persone,
+            'currentOccupancy' => $currentOccupancy
+        ]);
     }
 }
 
