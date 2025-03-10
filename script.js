@@ -1221,14 +1221,14 @@ document.addEventListener('DOMContentLoaded', () => {
       setTimeout(() => {
         const contentElement = document.getElementById(idSezione);
         if (contentElement) {
-          const offset = 120; // Adjust this value based on your navigation bars' height
+          const offset = 64;
           const topPosition = contentElement.getBoundingClientRect().top + window.scrollY - offset;
           window.scrollTo({
             top: topPosition,
             behavior: 'smooth'
           });
         }
-      }, 350); // Small delay to ensure transition has started
+      }, 200);
     });
   });
 
