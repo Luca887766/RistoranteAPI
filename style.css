@@ -1648,3 +1648,128 @@ footer iframe.map {
 .auth-container + #prenotazioni .sezione-contenuto {
   display: none;
 }
+
+/* Login/Register Styles - Restored Original Button Styling */
+.auth-container {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  min-height: 50vh;
+  padding: 2rem;
+  background-color: rgba(255, 255, 255, 0.05);
+  z-index: 100;
+  margin: 2rem auto;
+}
+
+#login-register-container {
+  background-color: #f9f9f9;
+  border-radius: 0.75rem;
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1);
+  width: 28rem;
+  max-width: 90%;
+  padding: 2rem;
+  position: relative;
+}
+
+.form-toggle {
+  display: flex;
+  margin-bottom: 2rem;
+  border-bottom: 1px solid #e0e0e0;
+  position: relative;
+}
+
+.form-toggle::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 3px;
+  width: 50%;
+  background-color: #270514;
+  transition: transform 0.3s ease;
+}
+
+.form-toggle[data-active="register"]::after {
+  transform: translateX(100%);
+}
+
+.form-toggle button {
+  flex: 1;
+  padding: 1rem 0;
+  font-size: 1.2rem;
+  font-weight: 500;
+  color: #666;
+  border: none;
+  background-color: transparent;
+  cursor: pointer;
+  transition: color 0.3s ease;
+}
+
+.form-toggle button.active {
+  color: #270514;
+  font-weight: 600;
+}
+
+#login-form,
+#register-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+#login-form .form-row,
+#register-form .form-row {
+  display: flex;
+  flex-direction: column;
+}
+
+#login-form .form-row label,
+#register-form .form-row label {
+  font-size: 1.1em;
+  color: #333;
+  margin-bottom: 0.5rem;
+}
+
+#login-form .form-row input,
+#register-form .form-row input {
+  padding: 0.75rem;
+  font-size: 1em;
+  border: 1px solid #ddd;
+  border-radius: 0.5rem;
+  transition: border-color 0.3s ease;
+}
+
+#login-form .form-row input:focus,
+#register-form .form-row input:focus {
+  border-color: #270514;
+  outline: none;
+}
+
+/* Original login/register button styling */
+#login-form button[type="submit"],
+#register-form button[type="submit"] {
+  padding: 1rem;
+  font-size: 1.2em;
+  color: white;
+  background-color: #270514;
+  border: none;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  margin-top: 0.5rem;
+}
+
+#login-form button[type="submit"]:hover,
+#register-form button[type="submit"]:hover {
+  background-color: #4b0925;
+}
+
+.error-message {
+  color: #d93025;
+  font-size: 0.875rem;
+  margin-top: 0.5rem;
+}
+
+#register-form {
+  display: none;
+}
