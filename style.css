@@ -751,17 +751,6 @@ p {
   border-color: #270514;
 }
 
-#prenotazioni button {
-  padding: 1rem;
-  font-size: 1.2em;
-  color: white;
-  background-color: #270514;
-  border: none;
-  border-radius: 0.5rem;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-}
-
 #prenotazioni button:hover {
   background-color: #4b0925;
 }
