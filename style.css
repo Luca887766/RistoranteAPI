@@ -702,12 +702,14 @@ p {
 
 /* Reservation Section */
 #prenotazioni {
-  max-width: 50rem;
+  max-width: 100%;
+  width: 100%;
   padding: 2rem;
   background-color: #f9f9f9;
   border-radius: 1rem;
   box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1);
   margin: 0 auto;
+  overflow: hidden;
 }
 
 #prenotazioni h2 {
@@ -1074,13 +1076,16 @@ footer iframe.map {
   border-radius: 1rem;
   box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1);
   margin: 2rem auto;
-  max-width: 800px;
+  max-width: 100%;
+  width: 100%;
+  overflow-x: auto;
 }
 
 #reservations-table {
   width: 100%;
   border-collapse: collapse;
   margin-top: 1rem;
+  overflow-x: auto;
 }
 
 #reservations-table th,
@@ -1458,4 +1463,11 @@ footer iframe.map {
 /* Override when in login mode */
 .auth-container + #prenotazioni .sezione-contenuto {
   display: none;
+}
+
+/* Add horizontal scroll for table container */
+#admin-reservations,
+#client-reservations-container {
+  overflow-x: auto;
+  width: 100%;
 }
