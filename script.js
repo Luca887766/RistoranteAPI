@@ -1,11 +1,11 @@
-// Funzione per caricare un file JSON
+// JSON LOADING FUNCTIONS
 function caricaJSON(file) {
   return fetch(file)
     .then(response => response.json())
     .catch(error => console.error('Errore nel caricamento del JSON:', error));
 }
 
-// Funzione per mostrare una sezione specifica con effetto di transizione
+// NAVIGATION FUNCTIONS
 function mostraSezione(idSezione) {
   const sezioni = document.querySelectorAll('.sezione-contenuto');
   sezioni.forEach(sezione => {
@@ -29,18 +29,35 @@ function mostraSezione(idSezione) {
   }, 300);
 }
 
-// Enhanced function to handle the display of reservation content based on login status
+// RESERVATION SYSTEM FUNCTIONS
 function updateReservationSection() {
   const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
   const username = localStorage.getItem('username');
   const isAdmin = username === 'admin';
 
-  // Get elements, safely checking if they exist
   const loginContainer = document.getElementById('login-register-container');
   const clientArea = document.getElementById('client-area');
   const adminDashboard = document.getElementById('admin-dashboard');
+  const authContainer = document.querySelector('.auth-container');
+  const prenotazioneContainer = document.querySelector('#prenotazioni');
 
-  // Only update display if elements exist
+  if (authContainer) {
+    // Show auth container only when not logged in and hide prenotazioni content
+    if (!isLoggedIn) {
+      authContainer.style.display = 'flex';
+      // Hide prenotazioni content when showing login form
+      if (prenotazioneContainer) {
+        prenotazioneContainer.classList.add('login-active');
+      }
+    } else {
+      authContainer.style.display = 'none';
+      // Show prenotazioni content when logged in
+      if (prenotazioneContainer) {
+        prenotazioneContainer.classList.remove('login-active');
+      }
+    }
+  }
+  
   if (loginContainer) {
     loginContainer.style.display = isLoggedIn ? 'none' : 'block';
   }
@@ -51,6 +68,10 @@ function updateReservationSection() {
   
   if (adminDashboard) {
     adminDashboard.style.display = (isLoggedIn && isAdmin) ? 'block' : 'none';
+    if (isLoggedIn && isAdmin) {
+      // Enable full width calendar for admin
+      adminDashboard.classList.add('admin-calendar-fullwidth');
+    }
   }
 
   if (isLoggedIn) {
@@ -60,9 +81,182 @@ function updateReservationSection() {
       fetchClientReservations();
     }
   }
+  
+  if (isLoggedIn && !isAdmin) {
+    initializeReservationForm();
+  }
 }
 
-// Fetch all reservations for admin
+// Initialize reservation form with date/time constraints
+function initializeReservationForm() {
+  const dateInput = document.getElementById('data');
+  if (dateInput) {
+    // Set minimum date to today
+    const today = new Date();
+    const formattedDate = today.toISOString().split('T')[0];
+    dateInput.min = formattedDate;
+    
+    // Set maximum date to 3 months from now
+    const maxDate = new Date();
+    maxDate.setMonth(maxDate.getMonth() + 3);
+    dateInput.max = maxDate.toISOString().split('T')[0];
+    
+    // Add event listener to check availability when date changes
+    dateInput.addEventListener('change', checkDateAvailability);
+  }
+  
+  // Add event listener to check time slot availability
+  const timeSelect = document.getElementById('ora');
+  const dateSelect = document.getElementById('data');
+  if (timeSelect && dateSelect) {
+    timeSelect.addEventListener('change', function() {
+      const date = dateSelect.value;
+      const time = timeSelect.value;
+      if (date && time) {
+        checkTimeSlotAvailability(date, time);
+      }
+    });
+  }
+}
+
+// Check date availability
+function checkDateAvailability(event) {
+  const date = event.target.value;
+  const error = document.getElementById('reservation-error');
+  
+  fetch(`api.php?action=check_date_availability&date=${date}`)
+    .then(response => response.json())
+    .then(data => {
+      if (data.error) {
+        if (error) error.textContent = data.error;
+        event.target.value = ''; // Clear the date input
+      } else if (data.available === false) {
+        if (error) error.textContent = 'Il ristorante è al completo per questa data. Scegli un\'altra data.';
+        event.target.value = ''; // Clear the date input
+      } else {
+        if (error) error.textContent = '';
+      }
+    })
+    .catch(err => console.error('Error checking date availability:', err));
+}
+
+// Check time slot availability 
+function checkTimeSlotAvailability(date, time) {
+  const persone = document.getElementById('persone').value || 1;
+  const error = document.getElementById('reservation-error');
+  
+  fetch(`api.php?action=check_timeslot_availability&date=${date}&time=${time}&persone=${persone}`)
+    .then(response => response.json())
+    .then(data => {
+      if (data.error) {
+        if (error) error.textContent = data.error;
+      } else if (data.available === false) {
+        if (error) error.textContent = `Non c'è disponibilità per ${persone} persone alle ${time}. Prova un altro orario o riduci il numero di persone.`;
+        document.getElementById('ora').value = ''; // Clear the time select
+      } else {
+        if (error) error.textContent = '';
+      }
+    })
+    .catch(err => console.error('Error checking timeslot availability:', err));
+}
+
+// Create reservation form handler
+function setupReservationForm() {
+  const form = document.getElementById('reservation-form');
+  const error = document.getElementById('reservation-error');
+  
+  if (form) {
+    form.addEventListener('submit', function(event) {
+      event.preventDefault();
+      
+      if (error) error.textContent = '';
+      
+      const nome = document.getElementById('nome').value;
+      const data = document.getElementById('data').value;
+      const ora = document.getElementById('ora').value;
+      const persone = document.getElementById('persone').value;
+      const contatto = document.getElementById('contatto').value;
+      
+      if (!nome || !data || !ora || !persone || !contatto) {
+        if (error) error.textContent = 'Tutti i campi sono obbligatori';
+        return;
+      }
+      
+      if (persone < 1 || persone > 20) {
+        if (error) error.textContent = 'Il numero di persone deve essere tra 1 e 20';
+        return;
+      }
+      
+      // First check if the reservation is possible
+      fetch(`api.php?action=check_timeslot_availability&date=${data}&time=${ora}&persone=${persone}`)
+        .then(response => response.json())
+        .then(checkResult => {
+          if (checkResult.error) {
+            if (error) error.textContent = checkResult.error;
+            return;
+          }
+          
+          if (checkResult.available === false) {
+            if (error) error.textContent = `Non c'è disponibilità per ${persone} persone alle ${ora}. Prova un altro orario o riduci il numero di persone.`;
+            return;
+          }
+          
+          // If available, proceed with creating the reservation
+          const body = new URLSearchParams();
+          body.append('nome', nome);
+          body.append('data', data);
+          body.append('ora', ora);
+          body.append('persone', persone);
+          body.append('contatto', contatto);
+          
+          fetch('api.php?action=create_reservation', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+            body: body.toString()
+          })
+          .then(response => response.json())
+          .then(data => {
+            if (data.success) {
+              showToast('Prenotazione effettuata con successo', 'success');
+              form.reset();
+              fetchClientReservations();
+            } else {
+              showToast(data.error || 'Errore durante la prenotazione', 'error');
+              if (error) error.textContent = data.error || 'Errore durante la prenotazione';
+            }
+          })
+          .catch(error => {
+            console.error('Error creating reservation:', error);
+            if (error) error.textContent = 'Errore di connessione. Riprova più tardi.';
+          });
+        })
+        .catch(err => {
+          console.error('Error checking availability:', err);
+          if (error) error.textContent = 'Errore di connessione. Riprova più tardi.';
+        });
+    });
+    
+    // Add event listeners for validations
+    const personeInput = document.getElementById('persone');
+    if (personeInput) {
+      personeInput.addEventListener('change', function() {
+        const value = parseInt(this.value);
+        if (value > 20) {
+          this.value = 20;
+          showToast('Il numero massimo di persone per prenotazione è 20', 'info');
+        }
+        
+        const date = document.getElementById('data').value;
+        const time = document.getElementById('ora').value;
+        if (date && time) {
+          checkTimeSlotAvailability(date, time);
+        }
+      });
+    }
+  }
+}
+
+// Admin reservation management
 function fetchAdminReservations() {
   fetch('api.php?action=get_reservations')
     .then(response => response.json())
@@ -111,7 +305,7 @@ function fetchAdminReservations() {
     .catch(error => console.error('Error fetching reservations:', error));
 }
 
-// Fetch user's reservations
+// Client reservation display
 function fetchClientReservations() {
   fetch('api.php?action=get_user_reservations')
     .then(response => response.json())
@@ -159,7 +353,7 @@ function fetchClientReservations() {
     .catch(error => console.error('Error fetching user reservations:', error));
 }
 
-// Edit reservation function
+// Edit reservation modal
 function editReservation(id) {
   fetch(`api.php?action=get_reservation&id=${id}`)
     .then(response => response.json())
@@ -229,7 +423,7 @@ function editReservation(id) {
     .catch(error => console.error('Error getting reservation details:', error));
 }
 
-// Update reservation
+// Update reservation data
 function updateReservation(formData, modal) {
   const body = new URLSearchParams();
   for (const key in formData) {
@@ -277,47 +471,7 @@ function deleteReservation(id, isClient = false) {
   .catch(error => console.error('Error deleting reservation:', error));
 }
 
-// Modify the form submission handler for creating reservations
-function setupReservationForm() {
-  const form = document.getElementById('reservation-form');
-  if (form) {
-    form.addEventListener('submit', function(event) {
-      event.preventDefault();
-      
-      const formData = {
-        nome: document.getElementById('nome').value,
-        data: document.getElementById('data').value,
-        ora: document.getElementById('ora').value,
-        persone: document.getElementById('persone').value,
-        contatto: document.getElementById('contatto').value
-      };
-      
-      const body = new URLSearchParams();
-      for (const key in formData) {
-        body.append(key, formData[key]);
-      }
-      
-      fetch('api.php?action=create_reservation', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-        body: body.toString()
-      })
-      .then(response => response.json())
-      .then(data => {
-        if (data.success) {
-          showToast('Prenotazione effettuata con successo', 'success');
-          form.reset();
-          fetchClientReservations();
-        } else {
-          showToast(data.error || 'Errore durante la prenotazione', 'error');
-        }
-      })
-      .catch(error => console.error('Error creating reservation:', error));
-    });
-  }
-}
-
-// Add logout functionality
+// Logout functionality
 function setupLogout() {
   const adminLogout = document.getElementById('admin-logout');
   const clientLogout = document.getElementById('client-logout');
@@ -338,13 +492,14 @@ function setupLogout() {
   if (clientLogout) clientLogout.addEventListener('click', logoutHandler);
 }
 
-// Update caricaPrenotazioni function
+// Initialize reservation section
 function caricaPrenotazioni() {
   setupReservationForm();
   setupLogout();
   updateReservationSection();
 }
 
+// MENU FUNCTIONS
 async function caricaMenuGiornaliero() {
   try {
     const response = await fetch('./data/menu.json');
@@ -421,7 +576,7 @@ async function caricaMenuGiornaliero() {
   }
 }
 
-// Funzione per mostrare solo gli eventi futuri (inclusi quelli di oggi)
+// EVENTI FUNCTIONS
 function mostraEventiFuturi(eventi) {
   const oggi = new Date();
   oggi.setHours(0, 0, 0, 0);
@@ -433,7 +588,6 @@ function mostraEventiFuturi(eventi) {
   });
 }
 
-// Funzione per ordinare gli eventi per data
 function ordinaEventiPerData(eventi) {
   return eventi.sort((a, b) => {
     const dataA = new Date(a.data);
@@ -442,7 +596,6 @@ function ordinaEventiPerData(eventi) {
   });
 }
 
-// Funzione per caricare e visualizzare gli eventi
 function caricaEventi() {
   caricaJSON('./data/eventi.json').then(data => {
     const eventiDiv = document.getElementById('eventi');
@@ -499,6 +652,7 @@ function caricaEventi() {
   });
 }
 
+// CHEF FUNCTIONS
 function caricaChef() {
   caricaJSON('./data/chef.json').then(data => {
     const chefDiv = document.getElementById('chef');
@@ -538,7 +692,7 @@ function caricaChef() {
   });
 }
 
-// Mappa le funzioni ai target
+// NAVIGATION MAPPING
 const funzionePerTarget = {
   'menu-giornaliero': caricaMenuGiornaliero,
   'eventi': caricaEventi,
@@ -546,20 +700,7 @@ const funzionePerTarget = {
   'prenotazioni': caricaPrenotazioni,
 };
 
-// Aggiungi gli event listener ai link della barra orizzontale
-document.querySelectorAll('#SecondaBarraOrizzontale a').forEach(link => {
-  link.addEventListener('click', function (event) {
-    event.preventDefault();
-    const idSezione = this.dataset.target;
-    mostraSezione(idSezione);
-    funzionePerTarget[idSezione]();
-    document.querySelectorAll('#SecondaBarraOrizzontale a').forEach(l2 => {
-      l2.classList.remove('selected')
-    })
-    link.classList.add('selected')
-  });
-});
-
+// LAYOUT AND STRUCTURE FUNCTIONS
 function generaBarraOrizzontale() {
   const barraOrizzontale = document.querySelector('.BarraOrizzontale');
   const container = document.createElement('div');
@@ -719,6 +860,220 @@ function generaFooter() {
   .catch(error => console.error('Errore nel caricamento del JSON:', error));
 }
 
+// AUTH FUNCTIONS
+function setupLoginRegister() {
+  const loginTab = document.getElementById('login-tab');
+  const registerTab = document.getElementById('register-tab');
+  const loginForm = document.getElementById('login-form');
+  const registerForm = document.getElementById('register-form');
+  const formToggle = document.querySelector('.form-toggle');
+  
+  if (!loginForm || !registerForm || !loginTab || !registerTab) {
+    console.error('Login/register elements not found in the DOM');
+    return;
+  }
+  
+  const loginError = document.getElementById('login-error');
+  const registerError = document.getElementById('register-error');
+
+  // Toggle between login and register forms
+  function showLoginForm() {
+    formToggle.setAttribute('data-active', 'login');
+    loginTab.classList.add('active');
+    registerTab.classList.remove('active');
+    
+    if (loginError) loginError.textContent = '';
+    if (registerError) registerError.textContent = '';
+    
+    loginForm.style.display = 'flex';
+    registerForm.style.display = 'none';
+  }
+
+  function showRegisterForm() {
+    formToggle.setAttribute('data-active', 'register');
+    registerTab.classList.add('active');
+    loginTab.classList.remove('active');
+    
+    if (loginError) loginError.textContent = '';
+    if (registerError) registerError.textContent = '';
+    
+    loginForm.style.display = 'none';
+    registerForm.style.display = 'flex';
+  }
+
+  loginTab.addEventListener('click', showLoginForm);
+  registerTab.addEventListener('click', showRegisterForm);
+
+  // Login form submission
+  loginForm.addEventListener('submit', function(event) {
+    event.preventDefault();
+    if (loginError) loginError.textContent = '';
+    const username = document.getElementById('login-username').value;
+    const password = document.getElementById('login-password').value;
+    
+    if(!username || !password){
+      if (loginError) loginError.textContent = 'Please fill all fields.';
+      return;
+    }
+    
+    fetch('api.php?action=login', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+      body: `username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`
+    })
+    .then(r => r.json())
+    .then(data => {
+      if(data.success) {
+        localStorage.setItem('isLoggedIn', 'true');
+        localStorage.setItem('username', data.username);
+        
+        showToast('Login effettuato con successo', 'success');
+        
+        // Navigate to prenotazioni section after successful login
+        mostraSezione('prenotazioni');
+        document.querySelectorAll('#SecondaBarraOrizzontale a').forEach(l2 => {
+          l2.classList.remove('selected');
+        });
+        document.querySelector('#SecondaBarraOrizzontale a[data-target="prenotazioni"]').classList.add('selected');
+        
+        updateReservationSection();
+      } else {
+        if (loginError) loginError.textContent = data.error || 'Login failed.';
+      }
+    })
+    .catch(error => {
+      console.error('Error during login:', error);
+      if (loginError) loginError.textContent = 'Connection error. Please try again.';
+    });
+  });
+
+  // Register form submission
+  registerForm.addEventListener('submit', function(event) {
+    event.preventDefault();
+    if (registerError) registerError.textContent = '';
+    
+    const username = document.getElementById('register-username').value;
+    const password = document.getElementById('register-password').value;
+    const confirmPassword = document.getElementById('register-confirm-password').value;
+    
+    if(!username || !password || !confirmPassword){
+      if (registerError) registerError.textContent = 'Please fill all fields.';
+      return;
+    }
+    
+    if(password !== confirmPassword) {
+      if (registerError) registerError.textContent = 'Passwords do not match.';
+      return;
+    }
+    
+    // Test the API connection first
+    console.log(`Attempting to register with username: ${username}`);
+    
+    fetch('api.php?action=register', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+      body: `username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`
+    })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+      return response.json();
+    })
+    .then(data => {
+      console.log("Registration response:", data);
+      if(data.success) {
+        showToast('Registrazione completata con successo', 'success');
+        showLoginForm();
+      } else {
+        if (registerError) registerError.textContent = data.error || 'Registration failed.';
+      }
+    })
+    .catch(error => {
+      console.error('Error during registration:', error);
+      if (registerError) registerError.textContent = 'Connection error. Please try again.';
+    });
+  });
+
+  showLoginForm();
+}
+
+// NOTIFICATION SYSTEM
+function showToast(message, type = 'info', duration = 3000) {
+  // Create toast container if it doesn't exist
+  let container = document.querySelector('.toast-container');
+  if (!container) {
+    container = document.createElement('div');
+    container.className = 'toast-container';
+    document.body.appendChild(container);
+  }
+  
+  // Create toast element
+  const toast = document.createElement('div');
+  toast.className = `toast ${type}`;
+  
+  // Create message element
+  const messageEl = document.createElement('span');
+  messageEl.textContent = message;
+  toast.appendChild(messageEl);
+  
+  // Create close button
+  const closeBtn = document.createElement('button');
+  closeBtn.className = 'close-toast';
+  closeBtn.innerHTML = '&times;';
+  closeBtn.addEventListener('click', () => removeToast(toast));
+  toast.appendChild(closeBtn);
+  
+  // Add toast to container
+  container.appendChild(toast);
+  
+  // Auto-remove after duration
+  setTimeout(() => removeToast(toast), duration);
+  
+  return toast;
+}
+
+function removeToast(toast) {
+  toast.style.animation = 'fade-out 0.3s forwards';
+  setTimeout(() => {
+    if (toast.parentElement) {
+      toast.parentElement.removeChild(toast);
+    }
+  }, 300);
+}
+
+function showConfirmation(message, onConfirm, onCancel) {
+  // Create and add dialog to the DOM
+  const dialog = document.createElement('div');
+  dialog.className = 'confirmation-dialog';
+  
+  dialog.innerHTML = `
+    <div class="confirmation-content">
+      <div class="confirmation-title">${message}</div>
+      <div class="confirmation-actions">
+        <button class="cancel">Annulla</button>
+        <button class="confirm">Conferma</button>
+      </div>
+    </div>
+  `;
+  
+  // Add event listeners
+  dialog.querySelector('.cancel').addEventListener('click', () => {
+    document.body.removeChild(dialog);
+    if (onCancel) onCancel();
+  });
+  
+  dialog.querySelector('.confirm').addEventListener('click', () => {
+    document.body.removeChild(dialog);
+    onConfirm();
+  });
+  
+  // Append to body and make visible
+  document.body.appendChild(dialog);
+  setTimeout(() => dialog.classList.add('active'), 10);
+}
+
+// EVENT LISTENERS
 document.addEventListener('DOMContentLoaded', () => {
   generaBarraOrizzontale();
   generaFooter();
@@ -794,219 +1149,3 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   });
 });
-
-// Extract login/register setup to a separate function to avoid duplication
-function setupLoginRegister() {
-  const loginTab = document.getElementById('login-tab');
-  const registerTab = document.getElementById('register-tab');
-  const loginForm = document.getElementById('login-form');
-  const registerForm = document.getElementById('register-form');
-  const formToggle = document.querySelector('.form-toggle');
-  
-  if (!loginForm || !registerForm || !loginTab || !registerTab) {
-    console.error('Login/register elements not found in the DOM');
-    return;
-  }
-  
-  const loginError = document.getElementById('login-error');
-  const registerError = document.getElementById('register-error');
-
-  function showLoginForm() {
-    formToggle.setAttribute('data-active', 'login');
-    loginTab.classList.add('active');
-    registerTab.classList.remove('active');
-    
-    // Reset error messages
-    if (loginError) loginError.textContent = '';
-    if (registerError) registerError.textContent = '';
-    
-    // Simple display toggle instead of animation to fix bugs
-    loginForm.style.display = 'flex';
-    registerForm.style.display = 'none';
-  }
-
-  function showRegisterForm() {
-    formToggle.setAttribute('data-active', 'register');
-    registerTab.classList.add('active');
-    loginTab.classList.remove('active');
-    
-    // Reset error messages
-    if (loginError) loginError.textContent = '';
-    if (registerError) registerError.textContent = '';
-    
-    // Simple display toggle instead of animation to fix bugs
-    loginForm.style.display = 'none';
-    registerForm.style.display = 'flex';
-  }
-
-  loginTab.addEventListener('click', showLoginForm);
-  registerTab.addEventListener('click', showRegisterForm);
-
-  loginForm.addEventListener('submit', function(event) {
-    event.preventDefault();
-    if (loginError) loginError.textContent = '';
-    const username = document.getElementById('login-username').value;
-    const password = document.getElementById('login-password').value;
-    
-    if(!username || !password){
-      if (loginError) loginError.textContent = 'Please fill all fields.';
-      return;
-    }
-    
-    fetch('api.php?action=login', {
-      method: 'POST',
-      headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-      body: `username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`
-    })
-    .then(r => r.json())
-    .then(data => {
-      if(data.success) {
-        localStorage.setItem('isLoggedIn', 'true');
-        localStorage.setItem('username', data.username);
-        
-        showToast('Login effettuato con successo', 'success');
-        
-        // Navigate to prenotazioni section after successful login
-        mostraSezione('prenotazioni');
-        document.querySelectorAll('#SecondaBarraOrizzontale a').forEach(l2 => {
-          l2.classList.remove('selected');
-        });
-        document.querySelector('#SecondaBarraOrizzontale a[data-target="prenotazioni"]').classList.add('selected');
-        
-        updateReservationSection();
-      } else {
-        if (loginError) loginError.textContent = data.error || 'Login failed.';
-      }
-    })
-    .catch(error => {
-      console.error('Error during login:', error);
-      if (loginError) loginError.textContent = 'Connection error. Please try again.';
-    });
-  });
-
-  registerForm.addEventListener('submit', function(event) {
-    event.preventDefault();
-    if (registerError) registerError.textContent = '';
-    
-    const username = document.getElementById('register-username').value;
-    const password = document.getElementById('register-password').value;
-    const confirmPassword = document.getElementById('register-confirm-password').value;
-    
-    if(!username || !password || !confirmPassword){
-      if (registerError) registerError.textContent = 'Please fill all fields.';
-      return;
-    }
-    
-    if(password !== confirmPassword) {
-      if (registerError) registerError.textContent = 'Passwords do not match.';
-      return;
-    }
-    
-    // Test the API connection first
-    console.log(`Attempting to register with username: ${username}`);
-    
-    fetch('api.php?action=register', {
-      method: 'POST',
-      headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-      body: `username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`
-    })
-    .then(response => {
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
-      }
-      return response.json();
-    })
-    .then(data => {
-      console.log("Registration response:", data);
-      if(data.success) {
-        showToast('Registrazione completata con successo', 'success');
-        showLoginForm();
-      } else {
-        if (registerError) registerError.textContent = data.error || 'Registration failed.';
-      }
-    })
-    .catch(error => {
-      console.error('Error during registration:', error);
-      if (registerError) registerError.textContent = 'Connection error. Please try again.';
-    });
-  });
-
-  // Show login form by default
-  showLoginForm();
-}
-
-// Add toast notification system
-function showToast(message, type = 'info', duration = 3000) {
-  // Create toast container if it doesn't exist
-  let container = document.querySelector('.toast-container');
-  if (!container) {
-    container = document.createElement('div');
-    container.className = 'toast-container';
-    document.body.appendChild(container);
-  }
-  
-  // Create toast element
-  const toast = document.createElement('div');
-  toast.className = `toast ${type}`;
-  
-  // Create message element
-  const messageEl = document.createElement('span');
-  messageEl.textContent = message;
-  toast.appendChild(messageEl);
-  
-  // Create close button
-  const closeBtn = document.createElement('button');
-  closeBtn.className = 'close-toast';
-  closeBtn.innerHTML = '&times;';
-  closeBtn.addEventListener('click', () => removeToast(toast));
-  toast.appendChild(closeBtn);
-  
-  // Add toast to container
-  container.appendChild(toast);
-  
-  // Auto-remove after duration
-  setTimeout(() => removeToast(toast), duration);
-  
-  return toast;
-}
-
-function removeToast(toast) {
-  toast.style.animation = 'fade-out 0.3s forwards';
-  setTimeout(() => {
-    if (toast.parentElement) {
-      toast.parentElement.removeChild(toast);
-    }
-  }, 300);
-}
-
-// Show confirmation dialog instead of native confirm
-function showConfirmation(message, onConfirm, onCancel) {
-  // Create and add dialog to the DOM
-  const dialog = document.createElement('div');
-  dialog.className = 'confirmation-dialog';
-  
-  dialog.innerHTML = `
-    <div class="confirmation-content">
-      <div class="confirmation-title">${message}</div>
-      <div class="confirmation-actions">
-        <button class="cancel">Annulla</button>
-        <button class="confirm">Conferma</button>
-      </div>
-    </div>
-  `;
-  
-  // Add event listeners
-  dialog.querySelector('.cancel').addEventListener('click', () => {
-    document.body.removeChild(dialog);
-    if (onCancel) onCancel();
-  });
-  
-  dialog.querySelector('.confirm').addEventListener('click', () => {
-    document.body.removeChild(dialog);
-    onConfirm();
-  });
-  
-  // Append to body and make visible
-  document.body.appendChild(dialog);
-  setTimeout(() => dialog.classList.add('active'), 10);
-}

@@ -44,6 +44,11 @@
             <tbody></tbody>
           </table>
         </div>
+        <div id="calendario">
+          <h2>Calendario Prenotazioni</h2>
+          <!-- Calendar content will go here -->
+          <div id="calendar-content"></div>
+        </div>
         <button id="admin-logout" class="logout-btn">Logout</button>
       </div>
 
@@ -62,7 +67,16 @@
             </div>
             <div class="form-row">
               <label for="ora">Ora</label>
-              <input type="time" id="ora" name="ora" required>
+              <select id="ora" name="ora" required>
+                <option value="">Seleziona un orario</option>
+                <option value="19:00">19:00</option>
+                <option value="19:30">19:30</option>
+                <option value="20:00">20:00</option>
+                <option value="20:30">20:30</option>
+                <option value="21:00">21:00</option>
+                <option value="21:30">21:30</option>
+                <option value="22:00">22:00</option>
+              </select>
             </div>
             <div class="form-row">
               <label for="persone">Numero di persone</label>
@@ -72,6 +86,7 @@
               <label for="contatto">Contatto (telefono o email)</label>
               <input type="text" id="contatto" name="contatto" required>
             </div>
+            <div id="reservation-error" class="error-message"></div>
             <button type="submit">Prenota</button>
           </form>
         </div>
@@ -83,8 +98,7 @@
         
         <button id="client-logout" class="logout-btn">Logout</button>
       </div>
-      
-      <!-- Login area is already in the document -->
+
     </div>
   </div>
 
@@ -96,28 +110,27 @@
           <button id="register-tab">Register</button>
         </div>
         <form id="login-form">
-          <input type="text" id="login-username" placeholder="Username" required>
-          <input type="password" id="login-password" placeholder="Password" required>
-          <button type="submit">Login</button>
+          <div class="form-row">
+            <label for="login-username">Username</label>
+            <input type="text" id="login-username" placeholder="Inserisci username" required>
+          </div>
+          <div class="form-row">
+            <label for="login-password">Password</label>
+            <input type="password" id="login-password" placeholder="Inserisci password" required>
+          </div>
           <div id="login-error" class="error-message"></div>
+          <button type="submit">Login</button>
         </form>
 
         <form id="register-form">
-          <input type="text" id="register-username" placeholder="Username" required>
-          <input type="password" id="register-password" placeholder="Password" required>
-          <input type="password" id="register-confirm-password" placeholder="Confirm Password" required>
-          <button type="submit">Register</button>
-          <div id="register-error" class="error-message"></div>
-        </form>
-      </div>
-    </div>
+          <div class="form-row">
+            <label for="register-username">Username</label>
   </div>
 
   <footer></footer>
 
   <script src="script.js"></script>
   <script>
-    // Initialize toast container
     document.addEventListener('DOMContentLoaded', function() {
       const toastContainer = document.createElement('div');
       toastContainer.className = 'toast-container';
@@ -125,5 +138,7 @@
     });
   </script>
 </body>
+
+</html>
 
 </html>

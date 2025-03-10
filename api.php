@@ -1,61 +1,28 @@
 <?php
-// Set proper headers for CORS and JSON response
+// HEADERS & CONFIGURATION
 header('Content-Type: application/json');
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Headers: Content-Type");
 
-// Enable error reporting for debugging (remove in production)
 ini_set('display_errors', 1);
 error_reporting(E_ALL);
 
+// DATABASE CONNECTION
 $db_host = 'localhost';
 $db_user = 'root';
 $db_pass = '';
 $db_name = 'ristorante';
 
-// Create database connection
 $conn = new mysqli($db_host, $db_user, $db_pass, $db_name);
 
-// Check connection
 if ($conn->connect_error) {
     die(json_encode(['error' => 'Database connection failed: ' . $conn->connect_error]));
 }
 
-// Create users table if not exists
-$sql = "CREATE TABLE IF NOT EXISTS users (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    username VARCHAR(50) UNIQUE NOT NULL,
-    password VARCHAR(255) NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-)";
-
-if ($conn->query($sql) !== TRUE) {
-    echo json_encode(['error' => 'Error creating users table: ' . $conn->error]);
-    exit;
-}
-
-// Create reservations table if not exists
-$sql = "CREATE TABLE IF NOT EXISTS reservations (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    user_id INT NOT NULL,
-    nome_cliente VARCHAR(100) NOT NULL,
-    data DATE NOT NULL,
-    ora TIME NOT NULL,
-    persone INT NOT NULL,
-    contatto VARCHAR(100) NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(id)
-)";
-
-if ($conn->query($sql) !== TRUE) {
-    echo json_encode(['error' => 'Error creating reservations table: ' . $conn->error]);
-}
-
 session_start();
 
+// REQUEST ROUTING
 $action = isset($_GET['action']) ? $_GET['action'] : '';
-
-// Log received action
 error_log("API action received: " . $action);
 
 switch ($action) {
@@ -86,12 +53,18 @@ switch ($action) {
     case 'delete_reservation':
         deleteReservation($conn);
         break;
+    case 'check_date_availability':
+        checkDateAvailability($conn);
+        break;
+    case 'check_timeslot_availability':
+        checkTimeSlotAvailability($conn);
+        break;
     default:
         echo json_encode(['error' => 'Invalid action']);
 }
 
+// AUTH FUNCTIONS
 function registerUser($conn) {
-    // Get POST data
     $username = isset($_POST['username']) ? $_POST['username'] : null;
     $password = isset($_POST['password']) ? $_POST['password'] : null;
     
@@ -100,19 +73,16 @@ function registerUser($conn) {
         return;
     }
     
-    // Check username length
     if (strlen($username) < 3) {
         echo json_encode(['error' => 'Username must be at least 3 characters']);
         return;
     }
     
-    // Check password length
     if (strlen($password) < 6) {
         echo json_encode(['error' => 'Password must be at least 6 characters']);
         return;
     }
     
-    // Check if username already exists - use prepared statement
     $stmt = $conn->prepare("SELECT id FROM users WHERE username = ?");
     $stmt->bind_param("s", $username);
     $stmt->execute();
@@ -125,7 +95,6 @@ function registerUser($conn) {
     }
     $stmt->close();
     
-    // Hash password and insert user - use prepared statement
     $hashed = password_hash($password, PASSWORD_DEFAULT);
     $stmt = $conn->prepare("INSERT INTO users (username, password) VALUES (?, ?)");
     $stmt->bind_param("ss", $username, $hashed);
@@ -148,7 +117,6 @@ function loginUser($conn) {
         return;
     }
     
-    // Get user by username - use prepared statement
     $stmt = $conn->prepare("SELECT id, username, password FROM users WHERE username = ?");
     $stmt->bind_param("s", $username);
     $stmt->execute();
@@ -157,7 +125,6 @@ function loginUser($conn) {
     if ($result->num_rows > 0) {
         $user = $result->fetch_assoc();
         
-        // Verify password using modern password_verify
         if (password_verify($password, $user['password'])) {
             $_SESSION['user_id'] = $user['id'];
             $_SESSION['username'] = $user['username'];
@@ -177,6 +144,7 @@ function logoutUser() {
     echo json_encode(['success' => 'Logout successful']);
 }
 
+// RESERVATION FUNCTIONS
 function createReservation($conn) {
     if (!isset($_SESSION['user_id'])) {
         echo json_encode(['error' => 'User not logged in']);
@@ -190,13 +158,42 @@ function createReservation($conn) {
     $contatto = $_POST['contatto'] ?? '';
     $user_id = $_SESSION['user_id'];
 
-    // Validate inputs
     if (empty($nome_cliente) || empty($data) || empty($ora) || empty($contatto) || $persone < 1) {
         echo json_encode(['error' => 'All fields are required']);
         return;
     }
+    
+    $allowedTimeSlots = ['19:00', '19:30', '20:00', '20:30', '21:00', '21:30', '22:00'];
+    if (!in_array($ora, $allowedTimeSlots)) {
+        echo json_encode(['error' => 'Orario non valido. Scegli un orario tra quelli disponibili.']);
+        return;
+    }
+    
+    $today = date('Y-m-d');
+    if ($data < $today) {
+        echo json_encode(['error' => 'Non è possibile prenotare per date passate']);
+        return;
+    }
+    
+    $stmt = $conn->prepare("
+        SELECT SUM(persone) as total FROM reservations 
+        WHERE data = ? AND 
+        ((ora <= ? AND ADDTIME(ora, '01:30:00') > ?) OR
+         (ora < ADDTIME(?, '01:30:00') AND ora >= ?))
+    ");
+    $endTime = date('H:i', strtotime($ora) + 5400); // 1.5 hours = 5400 seconds
+    $stmt->bind_param("sssss", $data, $ora, $endTime, $ora, $ora);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $row = $result->fetch_assoc();
+    $currentOccupancy = $row['total'] ?? 0;
+    $stmt->close();
+    
+    if ($currentOccupancy + $persone > 50) {
+        echo json_encode(['error' => 'Non c\'è disponibilità per questo orario e numero di persone']);
+        return;
+    }
 
-    // Use prepared statement
     $stmt = $conn->prepare("INSERT INTO reservations (user_id, nome_cliente, data, ora, persone, contatto) 
                           VALUES (?, ?, ?, ?, ?, ?)");
     $stmt->bind_param("isssis", $user_id, $nome_cliente, $data, $ora, $persone, $contatto);
@@ -211,7 +208,6 @@ function createReservation($conn) {
 }
 
 function getReservations($conn) {
-    // Admin only endpoint
     if (!isset($_SESSION['user_id']) || $_SESSION['username'] !== 'admin') {
         echo json_encode(['error' => 'Unauthorized']);
         return;
@@ -231,7 +227,6 @@ function getReservations($conn) {
 }
 
 function getUserReservations($conn) {
-    // Must be logged in
     if (!isset($_SESSION['user_id'])) {
         echo json_encode(['error' => 'User not logged in']);
         return;
@@ -261,7 +256,6 @@ function getReservationById($conn) {
 
     $id = isset($_GET['id']) ? intval($_GET['id']) : 0;
     
-    // Admin can see all reservations, users can only see their own
     if ($_SESSION['username'] === 'admin') {
         $stmt = $conn->prepare("SELECT * FROM reservations WHERE id = ?");
         $stmt->bind_param("i", $id);
@@ -296,7 +290,6 @@ function updateReservation($conn) {
     $persone = isset($_POST['persone']) ? intval($_POST['persone']) : 0;
     $contatto = $_POST['contatto'] ?? '';
     
-    // Check if the user is admin or the owner of the reservation
     if ($_SESSION['username'] === 'admin') {
         $stmt = $conn->prepare("UPDATE reservations SET nome_cliente = ?, data = ?, 
                               ora = ?, persone = ?, contatto = ? WHERE id = ?");
@@ -330,7 +323,6 @@ function deleteReservation($conn) {
     
     $id = isset($_POST['id']) ? intval($_POST['id']) : 0;
     
-    // Check if the user is admin or the owner of the reservation
     if ($_SESSION['username'] === 'admin') {
         $stmt = $conn->prepare("DELETE FROM reservations WHERE id = ?");
         $stmt->bind_param("i", $id);
@@ -351,6 +343,97 @@ function deleteReservation($conn) {
     }
     
     $stmt->close();
+}
+
+// AVAILABILITY CHECK FUNCTIONS
+function checkDateAvailability($conn) {
+    $date = isset($_GET['date']) ? $_GET['date'] : '';
+    
+    if (empty($date)) {
+        echo json_encode(['error' => 'Data non specificata']);
+        return;
+    }
+    
+    $today = date('Y-m-d');
+    if ($date < $today) {
+        echo json_encode(['error' => 'Non è possibile prenotare per date passate']);
+        return;
+    }
+    
+    $stmt = $conn->prepare("SELECT SUM(persone) as total FROM reservations WHERE data = ?");
+    $stmt->bind_param("s", $date);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $row = $result->fetch_assoc();
+    $total = $row['total'] ? (int)$row['total'] : 0;
+    $stmt->close();
+    
+    if ($total >= 50) {
+        echo json_encode(['available' => false]);
+    } else {
+        echo json_encode(['available' => true, 'remaining' => 50 - $total]);
+    }
+}
+
+function checkTimeSlotAvailability($conn) {
+    $date = isset($_GET['date']) ? $_GET['date'] : '';
+    $time = isset($_GET['time']) ? $_GET['time'] : '';
+    $persone = isset($_GET['persone']) ? (int)$_GET['persone'] : 0;
+    
+    if (empty($date) || empty($time)) {
+        echo json_encode(['error' => 'Data o orario non specificati']);
+        return;
+    }
+    
+    if ($persone <= 0) {
+        echo json_encode(['error' => 'Numero di persone non valido']);
+        return;
+    }
+    
+    $stmt = $conn->prepare("SELECT SUM(persone) as total FROM reservations WHERE data = ?");
+    $stmt->bind_param("s", $date);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $row = $result->fetch_assoc();
+    $totalForDay = $row['total'] ? (int)$row['total'] : 0;
+    $stmt->close();
+    
+    if ($totalForDay + $persone > 50) {
+        echo json_encode(['available' => false, 'error' => 'Superato il limite giornaliero di 50 persone']);
+        return;
+    }
+    
+    $bookingTime = strtotime($time);
+    $bookingEndTime = date('H:i', strtotime('+90 minutes', $bookingTime));
+    
+    $stmt = $conn->prepare("
+        SELECT id, ora, persone, 
+        ADDTIME(ora, '01:30:00') as end_time
+        FROM reservations 
+        WHERE data = ?
+    ");
+    $stmt->bind_param("s", $date);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    
+    $currentOccupancy = 0;
+    while ($row = $result->fetch_assoc()) {
+        $reservationStart = strtotime($row['ora']);
+        $reservationEnd = strtotime($row['end_time']);
+        
+        if (($bookingTime >= $reservationStart && $bookingTime < $reservationEnd) ||
+            (strtotime($bookingEndTime) > $reservationStart && strtotime($bookingEndTime) <= $reservationEnd) ||
+            ($bookingTime <= $reservationStart && strtotime($bookingEndTime) >= $reservationEnd)) {
+            $currentOccupancy += (int)$row['persone'];
+        }
+    }
+    $stmt->close();
+    
+    if ($currentOccupancy + $persone > 50) {
+        echo json_encode(['available' => false, 'error' => 'Non c\'è disponibilità per questo orario']);
+    } else {
+        echo json_encode(['available' => true, 'remaining' => 50 - $currentOccupancy - $persone]);
+    }
 }
 
 $conn->close();
