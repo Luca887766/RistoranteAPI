@@ -702,8 +702,7 @@ p {
 
 /* Reservation Section */
 #prenotazioni {
-  max-width: 100%;
-  width: 100%;
+  max-width: 50rem;
   padding: 2rem;
   background-color: #f9f9f9;
   border-radius: 1rem;
@@ -1147,12 +1146,23 @@ footer iframe.map {
 }
 
 /* Reservation Management Styles */
-#admin-dashboard, #client-area {
+#admin-dashboard {
   width: 100%;
+  max-width: 100%;
   background-color: #fff;
   padding: 2rem;
   border-radius: 0.75rem;
   box-shadow: 0 0 1rem rgba(0, 0, 0, 0.1);
+}
+
+#client-area {
+  width: 100%;
+  max-width: 50rem;
+  background-color: #fff;
+  padding: 2rem;
+  border-radius: 0.75rem;
+  box-shadow: 0 0 1rem rgba(0, 0, 0, 0.1);
+  margin: 0 auto;
 }
 
 #admin-dashboard h2, #client-area h2 {
@@ -1470,4 +1480,5 @@ footer iframe.map {
 #client-reservations-container {
   overflow-x: auto;
   width: 100%;
+  max-width: 100%;
 }
