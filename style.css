@@ -584,6 +584,27 @@ p {
   transition: transform 0.5s ease-in-out, opacity 0.3s ease;
 }
 
+/* Event Booking Button */
+.book-event-btn {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background-color: #270514;
+  color: white;
+  border: none;
+  padding: 0.5rem;
+  font-size: 0.9rem;
+  font-weight: bold;
+  cursor: pointer;
+  z-index: 10;
+  border-radius: 0;
+  transition: background-color 0.3s ease;
+}
+
+.book-event-btn:hover {
+  background-color: #4b0925;
+}
+
 @media (max-width: 48rem) {
   .galleria-eventi {
     padding: 0rem;

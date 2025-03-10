@@ -109,6 +109,15 @@ function updateReservationSection() {
   
   if (isLoggedIn && !isAdmin) {
     initializeReservationForm();
+    
+    // Check if there's a pending event booking
+    const pendingEventData = sessionStorage.getItem('eventToBook');
+    if (pendingEventData) {
+      const evento = JSON.parse(pendingEventData);
+      fillReservationFormWithEventData(evento);
+      // Clear the stored event data to prevent it from being reused
+      sessionStorage.removeItem('eventToBook');
+    }
   }
 }
 
@@ -656,6 +665,16 @@ function caricaEventi() {
       dataEvento.innerText = evento.data;
       eventoDiv.appendChild(dataEvento);
 
+      // Aggiungi pulsante di prenotazione
+      const bookButton = document.createElement('button');
+      bookButton.classList.add('book-event-btn');
+      bookButton.innerText = 'Prenota';
+      bookButton.addEventListener('click', (e) => {
+        e.stopPropagation(); // Prevent event bubbling
+        prenotaEvento(evento);
+      });
+      eventoDiv.appendChild(bookButton);
+
       // Crea il nome dell'evento sotto l'immagine
       const nomeEvento = document.createElement('div');
       nomeEvento.classList.add('nome-evento');
@@ -675,6 +694,53 @@ function caricaEventi() {
     // Aggiungi la galleria di eventi alla sezione
     eventiDiv.appendChild(galleriaDiv);
   });
+}
+
+// Function to handle booking event
+function prenotaEvento(evento) {
+  // Store event data in session storage
+  sessionStorage.setItem('eventToBook', JSON.stringify(evento));
+  
+  // Navigate to prenotazioni section
+  mostraSezione('prenotazioni');
+  
+  // Highlight the prenotazioni tab in navbar
+  document.querySelectorAll('#SecondaBarraOrizzontale a').forEach(link => {
+    link.classList.remove('selected');
+  });
+  document.querySelector('#SecondaBarraOrizzontale a[data-target="prenotazioni"]').classList.add('selected');
+  
+  // Check if user is logged in before accessing form
+  const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+  if (isLoggedIn) {
+    fillReservationFormWithEventData(evento);
+  }
+}
+
+function fillReservationFormWithEventData(evento) {
+  // Get the form elements
+  const nomeInput = document.getElementById('nome');
+  const dataInput = document.getElementById('data');
+  const personeInput = document.getElementById('persone');
+  
+  if (nomeInput && dataInput) {
+    // Set the name to event name
+    nomeInput.value = evento.nome;
+    
+    // Set the date to event date
+    dataInput.value = evento.data;
+    
+    // Default to 2 people if not set already
+    if (personeInput && (!personeInput.value || personeInput.value === "0")) {
+      personeInput.value = 2;
+    }
+    
+    // Focus on the time dropdown to prompt user to select a time
+    const timeSelect = document.getElementById('ora');
+    if (timeSelect) {
+      setTimeout(() => timeSelect.focus(), 100);
+    }
+  }
 }
 
 // CHEF FUNCTIONS
