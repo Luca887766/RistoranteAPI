@@ -28,16 +28,16 @@ function mostraSezione(idSezione) {
       
       if (idSezione === 'prenotazioni') {
         const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
-        const authContainer = document.querySelector('.auth-container');
-        if (authContainer) {
-          authContainer.style.display = isLoggedIn ? 'none' : 'flex';
+        const loginRegisterContainer = document.getElementById('login-register-container');
+        if (loginRegisterContainer) {
+          loginRegisterContainer.style.display = isLoggedIn ? 'none' : 'block';
         }
         
         updateReservationSection();
       } else {
-        const authContainer = document.querySelector('.auth-container');
-        if (authContainer) {
-          authContainer.style.display = 'none';
+        const loginRegisterContainer = document.getElementById('login-register-container');
+        if (loginRegisterContainer) {
+          loginRegisterContainer.style.display = 'none';
         }
       }
     }
@@ -74,7 +74,17 @@ function updateReservationSection() {
   }
   
   if (loginContainer) {
-    loginContainer.style.display = isLoggedIn ? 'none' : 'block';
+    if (!isLoggedIn) {
+      loginContainer.style.display = 'block';
+      if (prenotazioneContainer) {
+        prenotazioneContainer.classList.add('login-active');
+      }
+    } else {
+      loginContainer.style.display = 'none';
+      if (prenotazioneContainer) {
+        prenotazioneContainer.classList.remove('login-active');
+      }
+    }
   }
   
   if (clientArea) {
