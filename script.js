@@ -25,6 +25,23 @@ function mostraSezione(idSezione) {
       setTimeout(() => {
         sezioneAttiva.classList.add('fade-in');
       }, 50);
+      
+      // Only show auth container when prenotazioni section is active and user is not logged in
+      if (idSezione === 'prenotazioni') {
+        const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+        const authContainer = document.querySelector('.auth-container');
+        if (authContainer) {
+          authContainer.style.display = isLoggedIn ? 'none' : 'flex';
+        }
+        
+        updateReservationSection();
+      } else {
+        // Hide auth container when not in prenotazioni section
+        const authContainer = document.querySelector('.auth-container');
+        if (authContainer) {
+          authContainer.style.display = 'none';
+        }
+      }
     }
   }, 300);
 }
@@ -1076,8 +1093,8 @@ function showConfirmation(message, onConfirm, onCancel) {
 // EVENT LISTENERS
 document.addEventListener('DOMContentLoaded', () => {
   generaBarraOrizzontale();
-  generaFooter();
-  setupLoginRegister(); // Add this call to initialize login/register functionality
+  generaFooter();  // Keep the footer generation
+  setupLoginRegister();
 
   // Create the secondary navigation bar
   const secondaBarraOrizzontale = document.getElementById('SecondaBarraOrizzontale');

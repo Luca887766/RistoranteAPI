@@ -885,6 +885,8 @@ footer {
   position: relative;
   bottom: 0;
   width: 100%;
+  margin-top: 2rem;
+  display: block !important;
 }
 
 footer .footer-section {
@@ -1005,13 +1007,14 @@ footer iframe.map {
 }
 
 .auth-container {
-  display: flex;
+  display: none; /* Hide by default, will be shown only in prenotazioni section */
   align-items: center;
   justify-content: center;
-  min-height: 80vh;
+  min-height: 50vh;
   padding: 2rem;
   background-color: rgba(255, 255, 255, 0.05);
   z-index: 100;
+  margin: 2rem auto;
 }
 
 #login-register-container {
