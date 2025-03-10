@@ -788,7 +788,7 @@ p {
 
 /* Reservation Section */
 #prenotazioni {
-  max-width: 50rem;
+  width: fit-content;
   padding: 2rem;
   background-color: #f9f9f9;
   border-radius: 1rem;
@@ -1242,7 +1242,7 @@ footer iframe.map {
 }
 
 #client-area {
-  width: 100%;
+  width: 30rem;
   max-width: 50rem;
   background-color: #fff;
   padding: 2rem;
