@@ -1320,6 +1320,40 @@ function showConfirmation(message, onConfirm, onCancel) {
   setTimeout(() => dialog.classList.add('active'), 10);
 }
 
+// Function to fill reservation form with event data
+function fillReservationFormWithEventData(evento) {
+  // Get the form elements
+  const nomeInput = document.getElementById('nome');
+  const dataInput = document.getElementById('data');
+  const personeInput = document.getElementById('persone');
+  const contattoInput = document.getElementById('contatto');
+  
+  if (nomeInput && dataInput) {
+    // Set the name to username if logged in
+    const username = localStorage.getItem('username');
+    if (username) {
+      nomeInput.value = username;
+    }
+    
+    // Set the date to event date
+    dataInput.value = evento.data;
+    
+    // Default to 2 people if not set already
+    if (personeInput && !personeInput.value) {
+      personeInput.value = 2;
+    }
+    
+    // Focus on the time dropdown to prompt user to select a time
+    const timeSelect = document.getElementById('ora');
+    if (timeSelect) {
+      setTimeout(() => timeSelect.focus(), 100);
+    }
+    
+    // Show a toast notification about the event booking
+    showToast(`Stai prenotando per l'evento: ${evento.nome}`, 'info');
+  }
+}
+
 // EVENT LISTENERS
 document.addEventListener('DOMContentLoaded', () => {
   generaBarraOrizzontale();
