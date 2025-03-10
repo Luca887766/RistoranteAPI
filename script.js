@@ -29,23 +29,6 @@ function mostraSezione(idSezione) {
   }, 300);
 }
 
-let x = document.getElementById("login-form");
-let y = document.getElementById("register-form");
-let z = document.getElementById("btn");
-let formContainer = document.querySelector(".form-container");
-
-function register() {
-  x.classList.remove("fade-in");
-  y.classList.add("fade-in");
-  z.style.left = "6.875rem";
-}
-
-function login() {
-  y.classList.remove("fade-in");
-  x.classList.add("fade-in");
-  z.style.left = "0";
-}
-
 // New function to handle the display of reservation content based on login status
 function updateReservationSection() {
   const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
@@ -282,93 +265,41 @@ function caricaChef() {
 
 // Funzione per generare il modulo di prenotazione e il calendario
 function caricaPrenotazioni() {
-  // This function is now only responsible for setting up event listeners
-  const loginForm = document.getElementById('login-form');
-  const registerForm = document.getElementById('register-form');
+  // This function should NOT handle login/register forms anymore
+  // We now have a separate event handler for that
+  
+  // Only handle reservation form if it exists
   const reservationForm = document.getElementById('reservation-form');
+  if (reservationForm) {
+    reservationForm.addEventListener('submit', function (event) {
+      event.preventDefault();
+      const nome = document.getElementById('nome').value;
+      const data = document.getElementById('data').value;
+      const ora = document.getElementById('ora').value;
+      const persone = document.getElementById('persone').value;
+      const contatto = document.getElementById('contatto').value;
 
-  loginForm.addEventListener('submit', function (event) {
-    event.preventDefault();
-    const username = document.getElementById('login-username').value;
-    const password = document.getElementById('login-password').value;
-
-    fetch('api.php?action=login', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-      body: `username=${username}&password=${password}`,
-    })
-      .then(response => response.json())
-      .then(data => {
-        if (data.success) {
-          localStorage.setItem('isLoggedIn', 'true');
-          localStorage.setItem('username', data.username);
-          updateReservationSection();
-        } else {
-          alert(data.error);
-        }
+      fetch('api.php?action=create_reservation', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: `nome=${nome}&data=${data}&ora=${ora}&persone=${persone}&contatto=${contatto}`,
       })
-      .catch(error => console.error('Error logging in:', error));
-  });
-
-  registerForm.addEventListener('submit', function (event) {
-    event.preventDefault();
-    const username = document.getElementById('register-username').value;
-    const password = document.getElementById('register-password').value;
-
-    fetch('api.php?action=register', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-      body: `username=${username}&password=${password}`,
-    })
-      .then(response => response.json())
-      .then(data => {
-        if (data.success) {
-          alert(data.success);
-          // Clear registration form fields
-          document.getElementById('register-username').value = '';
-          document.getElementById('register-password').value = '';
-          // Switch to login form
-          login();
-        } else {
-          alert(data.error);
-        }
-      })
-      .catch(error => console.error('Error registering:', error));
-  });
-
-  reservationForm.addEventListener('submit', function (event) {
-    event.preventDefault();
-    const nome = document.getElementById('nome').value;
-    const data = document.getElementById('data').value;
-    const ora = document.getElementById('ora').value;
-    const persone = document.getElementById('persone').value;
-    const contatto = document.getElementById('contatto').value;
-
-    fetch('api.php?action=create_reservation', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-      body: `nome=${nome}&data=${data}&ora=${ora}&persone=${persone}&contatto=${contatto}`,
-    })
-      .then(response => response.json())
-      .then(data => {
-        if (data.success) {
-          alert(data.success);
-          reservationForm.reset();
-        } else {
-          alert(data.error);
-        }
-      })
-      .catch(error => console.error('Error creating reservation:', error));
-  });
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            alert(data.success);
+            reservationForm.reset();
+          } else {
+            alert(data.error);
+          }
+        })
+        .catch(error => console.error('Error creating reservation:', error));
+    });
+  }
 
   // Initial update of reservation section based on login status
-  login(); // Ensure login form is visible by default
   updateReservationSection();
 }
 
@@ -556,6 +487,7 @@ function generaFooter() {
 document.addEventListener('DOMContentLoaded', () => {
   generaBarraOrizzontale();
   generaFooter();
+  setupLoginRegister(); // Add this call to initialize login/register functionality
 
   // Create the secondary navigation bar
   const secondaBarraOrizzontale = document.getElementById('SecondaBarraOrizzontale');
@@ -628,30 +560,46 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 });
 
-document.addEventListener('DOMContentLoaded', function() {
+// Extract login/register setup to a separate function to avoid duplication
+function setupLoginRegister() {
   const loginTab = document.getElementById('login-tab');
   const registerTab = document.getElementById('register-tab');
   const loginForm = document.getElementById('login-form');
   const registerForm = document.getElementById('register-form');
+  const formToggle = document.querySelector('.form-toggle');
+  
+  if (!loginForm || !registerForm || !loginTab || !registerTab) {
+    console.error('Login/register elements not found in the DOM');
+    return;
+  }
+  
   const loginError = document.getElementById('login-error');
   const registerError = document.getElementById('register-error');
 
   function showLoginForm() {
-    loginForm.style.display = 'flex';
-    registerForm.style.display = 'none';
+    formToggle.setAttribute('data-active', 'login');
+    loginForm.classList.remove('hidden');
+    registerForm.classList.remove('visible');
     loginTab.classList.add('active');
     registerTab.classList.remove('active');
-    loginError.textContent = '';
-    registerError.textContent = '';
+    if (loginError) loginError.textContent = '';
+    if (registerError) registerError.textContent = '';
+    // Make register form display:none for accessibility reasons
+    registerForm.style.display = 'none';
+    loginForm.style.display = 'flex';
   }
 
   function showRegisterForm() {
-    loginForm.style.display = 'none';
-    registerForm.style.display = 'flex';
+    formToggle.setAttribute('data-active', 'register');
+    loginForm.classList.add('hidden');
+    registerForm.classList.add('visible');
     registerTab.classList.add('active');
     loginTab.classList.remove('active');
-    loginError.textContent = '';
-    registerError.textContent = '';
+    if (loginError) loginError.textContent = '';
+    if (registerError) registerError.textContent = '';
+    // Make login form display:none for accessibility reasons
+    loginForm.style.display = 'none';
+    registerForm.style.display = 'flex';
   }
 
   loginTab.addEventListener('click', showLoginForm);
@@ -659,13 +607,15 @@ document.addEventListener('DOMContentLoaded', function() {
 
   loginForm.addEventListener('submit', function(event) {
     event.preventDefault();
-    loginError.textContent = '';
+    if (loginError) loginError.textContent = '';
     const username = document.getElementById('login-username').value;
     const password = document.getElementById('login-password').value;
+    
     if(!username || !password){
-      loginError.textContent = 'Please fill all fields.';
+      if (loginError) loginError.textContent = 'Please fill all fields.';
       return;
     }
+    
     fetch('api.php?action=login', {
       method: 'POST',
       headers: {'Content-Type': 'application/x-www-form-urlencoded'},
@@ -674,27 +624,42 @@ document.addEventListener('DOMContentLoaded', function() {
     .then(r => r.json())
     .then(data => {
       if(data.success) {
+        localStorage.setItem('isLoggedIn', 'true');
+        localStorage.setItem('username', data.username);
+        updateReservationSection();
         alert('Login successful');
       } else {
-        loginError.textContent = data.error || 'Login failed.';
+        if (loginError) loginError.textContent = data.error || 'Login failed.';
       }
+    })
+    .catch(error => {
+      console.error('Error during login:', error);
+      if (loginError) loginError.textContent = 'Connection error. Please try again.';
     });
   });
 
   registerForm.addEventListener('submit', function(event) {
     event.preventDefault();
-    registerError.textContent = '';
-    const email = document.getElementById('register-email').value;
+    if (registerError) registerError.textContent = '';
+    
     const username = document.getElementById('register-username').value;
     const password = document.getElementById('register-password').value;
-    if(!email || !username || !password){
-      registerError.textContent = 'Please fill all fields.';
+    const confirmPassword = document.getElementById('register-confirm-password').value;
+    
+    if(!username || !password || !confirmPassword){
+      if (registerError) registerError.textContent = 'Please fill all fields.';
       return;
     }
+    
+    if(password !== confirmPassword) {
+      if (registerError) registerError.textContent = 'Passwords do not match.';
+      return;
+    }
+    
     fetch('api.php?action=register', {
       method: 'POST',
       headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-      body: `email=${email}&username=${username}&password=${password}`
+      body: `username=${username}&password=${password}`
     })
     .then(r => r.json())
     .then(data => {
@@ -702,11 +667,15 @@ document.addEventListener('DOMContentLoaded', function() {
         alert('Registration successful');
         showLoginForm();
       } else {
-        registerError.textContent = data.error || 'Registration failed.';
+        if (registerError) registerError.textContent = data.error || 'Registration failed.';
       }
+    })
+    .catch(error => {
+      console.error('Error during registration:', error);
+      if (registerError) registerError.textContent = 'Connection error. Please try again.';
     });
   });
 
   // Show login form by default
   showLoginForm();
-});
+}

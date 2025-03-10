@@ -38,10 +38,9 @@ switch ($action) {
 }
 
 function registerUser($conn) {
-    $email = $_POST['email'] ?? '';
     $username = $_POST['username'] ?? '';
     $password = $_POST['password'] ?? '';
-    if (!$email || !$username || !$password) {
+    if (!$username || !$password) {
         echo json_encode(['error' => 'Missing required fields']);
         return;
     }
@@ -49,8 +48,17 @@ function registerUser($conn) {
         echo json_encode(['error' => 'Password must be at least 8 characters']);
         return;
     }
+    
+    // Check if username already exists
+    $checkSql = "SELECT id FROM users WHERE username = '$username'";
+    $result = $conn->query($checkSql);
+    if ($result && $result->num_rows > 0) {
+        echo json_encode(['error' => 'Username already exists']);
+        return;
+    }
+    
     $hashed = hash('sha256', $password);
-    $sql = "INSERT INTO users (email, username, password) VALUES ('$email', '$username', '$hashed')";
+    $sql = "INSERT INTO users (username, password) VALUES ('$username', '$hashed')";
     if ($conn->query($sql) === TRUE) {
         echo json_encode(['success' => 'Registration successful']);
     } else {
