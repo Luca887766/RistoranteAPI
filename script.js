@@ -712,6 +712,9 @@ function caricaEventi() {
 
 // Function to handle booking event
 function prenotaEvento(evento) {
+  // Create star animation effect
+  createStars(event);
+  
   // Store event data in session storage
   sessionStorage.setItem('eventToBook', JSON.stringify(evento));
   
@@ -731,30 +734,57 @@ function prenotaEvento(evento) {
   }
 }
 
-function fillReservationFormWithEventData(evento) {
-  // Get the form elements
-  const nomeInput = document.getElementById('nome');
-  const dataInput = document.getElementById('data');
-  const personeInput = document.getElementById('persone');
+// Function to create falling star animation
+function createStars(event) {
+  const button = event.currentTarget;
+  const rect = button.getBoundingClientRect();
+  const buttonCenter = {
+    x: rect.left + rect.width / 2,
+    y: rect.top + rect.height / 2
+  };
   
-  if (nomeInput && dataInput) {
-    // Set the name to username instead of event name
-    const username = localStorage.getItem('username');
-    nomeInput.value = username || '';
-    
-    // Set the date to event date
-    dataInput.value = evento.data;
-    
-    // Default to 2 people if not set already
-    if (personeInput) {
-      personeInput.value = 2;
-    }
-    
-    // Focus on the time dropdown to prompt user to select a time
-    const timeSelect = document.getElementById('ora');
-    if (timeSelect) {
-      setTimeout(() => timeSelect.focus(), 100);
-    }
+  // Create multiple stars
+  for (let i = 0; i < 20; i++) {
+    setTimeout(() => {
+      const star = document.createElement('div');
+      star.classList.add('star');
+      
+      // Randomize color between white and gold
+      const colors = ['#FFFFFF', '#FFD700', '#FFFACD', '#FFFFE0'];
+      const randomColor = colors[Math.floor(Math.random() * colors.length)];
+      star.style.backgroundColor = randomColor;
+      
+      // Randomize size
+      const size = Math.random() * 4 + 1;
+      star.style.width = `${size}px`;
+      star.style.height = `${size}px`;
+      
+      // Set initial position at button center
+      star.style.left = `${buttonCenter.x}px`;
+      star.style.top = `${buttonCenter.y}px`;
+      
+      // Set random direction for falling
+      const angle = Math.random() * Math.PI * 2;
+      const distance = Math.random() * 100 + 50;
+      const tx = Math.cos(angle) * distance;
+      const ty = Math.sin(angle) * distance + distance/2; // Bias downward
+      
+      star.style.setProperty('--tx', `${tx}px`);
+      star.style.setProperty('--ty', `${ty}px`);
+      
+      // Add to document and animate
+      document.body.appendChild(star);
+      
+      // Trigger animation
+      star.style.animation = `fall ${Math.random() * 1 + 0.5}s linear forwards`;
+      
+      // Remove after animation completes
+      setTimeout(() => {
+        if (star.parentNode) {
+          star.parentNode.removeChild(star);
+        }
+      }, 1500);
+    }, i * 50); // Stagger the creation of stars
   }
 }
 
@@ -1228,7 +1258,7 @@ document.addEventListener('DOMContentLoaded', () => {
             behavior: 'smooth'
           });
         }
-      }, 200);
+      }, 350);
     });
   });
 

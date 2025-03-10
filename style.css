@@ -592,17 +592,48 @@ p {
   background-color: #270514;
   color: white;
   border: none;
-  padding: 0.5rem;
-  font-size: 0.9rem;
+  padding: 0.7rem 1rem;
+  font-size: 1rem;
   font-weight: bold;
   cursor: pointer;
   z-index: 10;
-  border-radius: 0;
-  transition: background-color 0.3s ease;
+  border-radius: 0.3rem;
+  transition: all 0.3s ease;
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+  overflow: hidden;
 }
 
 .book-event-btn:hover {
   background-color: #4b0925;
+  transform: scale(1.05);
+  box-shadow: 0 0 15px rgba(255, 255, 255, 0.4), 0 0 30px rgba(255, 193, 7, 0.2);
+}
+
+.book-event-btn:active {
+  transform: scale(0.95);
+}
+
+/* Stars Animation */
+.star {
+  position: absolute;
+  background-color: #fff;
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 9;
+}
+
+@keyframes fall {
+  0% {
+    opacity: 1;
+    transform: translate(0, 0) rotate(0deg);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(var(--tx), var(--ty)) rotate(360deg);
+  }
 }
 
 @media (max-width: 48rem) {
