@@ -102,9 +102,9 @@ function fetchAdminReservations() {
       document.querySelectorAll('.delete-btn').forEach(btn => {
         btn.addEventListener('click', function() {
           const id = this.getAttribute('data-id');
-          if (confirm('Sei sicuro di voler eliminare questa prenotazione?')) {
+          showConfirmation('Sei sicuro di voler eliminare questa prenotazione?', () => {
             deleteReservation(id);
-          }
+          });
         });
       });
     })
@@ -150,9 +150,9 @@ function fetchClientReservations() {
       document.querySelectorAll('#client-reservations-container .delete-btn').forEach(btn => {
         btn.addEventListener('click', function() {
           const id = this.getAttribute('data-id');
-          if (confirm('Sei sicuro di voler cancellare questa prenotazione?')) {
+          showConfirmation('Sei sicuro di voler cancellare questa prenotazione?', () => {
             deleteReservation(id, true);
-          }
+          });
         });
       });
     })
@@ -244,11 +244,11 @@ function updateReservation(formData, modal) {
   .then(response => response.json())
   .then(data => {
     if (data.success) {
-      alert('Prenotazione aggiornata con successo');
+      showToast('Prenotazione aggiornata con successo', 'success');
       document.body.removeChild(modal);
       fetchAdminReservations();
     } else {
-      alert(data.error || 'Errore durante l\'aggiornamento');
+      showToast(data.error || 'Errore durante l\'aggiornamento', 'error');
     }
   })
   .catch(error => console.error('Error updating reservation:', error));
@@ -264,14 +264,14 @@ function deleteReservation(id, isClient = false) {
   .then(response => response.json())
   .then(data => {
     if (data.success) {
-      alert('Prenotazione eliminata con successo');
+      showToast('Prenotazione eliminata con successo', 'success');
       if (isClient) {
         fetchClientReservations();
       } else {
         fetchAdminReservations();
       }
     } else {
-      alert(data.error || 'Errore durante l\'eliminazione');
+      showToast(data.error || 'Errore durante l\'eliminazione', 'error');
     }
   })
   .catch(error => console.error('Error deleting reservation:', error));
@@ -305,11 +305,11 @@ function setupReservationForm() {
       .then(response => response.json())
       .then(data => {
         if (data.success) {
-          alert('Prenotazione effettuata con successo');
+          showToast('Prenotazione effettuata con successo', 'success');
           form.reset();
           fetchClientReservations();
         } else {
-          alert(data.error || 'Errore durante la prenotazione');
+          showToast(data.error || 'Errore durante la prenotazione', 'error');
         }
       })
       .catch(error => console.error('Error creating reservation:', error));
@@ -328,7 +328,7 @@ function setupLogout() {
       .then(data => {
         localStorage.removeItem('isLoggedIn');
         localStorage.removeItem('username');
-        alert('Logout effettuato con successo');
+        showToast('Logout effettuato con successo', 'success');
         updateReservationSection();
       })
       .catch(error => console.error('Error during logout:', error));
@@ -864,6 +864,8 @@ function setupLoginRegister() {
         localStorage.setItem('isLoggedIn', 'true');
         localStorage.setItem('username', data.username);
         
+        showToast('Login effettuato con successo', 'success');
+        
         // Navigate to prenotazioni section after successful login
         mostraSezione('prenotazioni');
         document.querySelectorAll('#SecondaBarraOrizzontale a').forEach(l2 => {
@@ -917,7 +919,7 @@ function setupLoginRegister() {
     .then(data => {
       console.log("Registration response:", data);
       if(data.success) {
-        alert('Registration successful');
+        showToast('Registrazione completata con successo', 'success');
         showLoginForm();
       } else {
         if (registerError) registerError.textContent = data.error || 'Registration failed.';
@@ -931,4 +933,80 @@ function setupLoginRegister() {
 
   // Show login form by default
   showLoginForm();
+}
+
+// Add toast notification system
+function showToast(message, type = 'info', duration = 3000) {
+  // Create toast container if it doesn't exist
+  let container = document.querySelector('.toast-container');
+  if (!container) {
+    container = document.createElement('div');
+    container.className = 'toast-container';
+    document.body.appendChild(container);
+  }
+  
+  // Create toast element
+  const toast = document.createElement('div');
+  toast.className = `toast ${type}`;
+  
+  // Create message element
+  const messageEl = document.createElement('span');
+  messageEl.textContent = message;
+  toast.appendChild(messageEl);
+  
+  // Create close button
+  const closeBtn = document.createElement('button');
+  closeBtn.className = 'close-toast';
+  closeBtn.innerHTML = '&times;';
+  closeBtn.addEventListener('click', () => removeToast(toast));
+  toast.appendChild(closeBtn);
+  
+  // Add toast to container
+  container.appendChild(toast);
+  
+  // Auto-remove after duration
+  setTimeout(() => removeToast(toast), duration);
+  
+  return toast;
+}
+
+function removeToast(toast) {
+  toast.style.animation = 'fade-out 0.3s forwards';
+  setTimeout(() => {
+    if (toast.parentElement) {
+      toast.parentElement.removeChild(toast);
+    }
+  }, 300);
+}
+
+// Show confirmation dialog instead of native confirm
+function showConfirmation(message, onConfirm, onCancel) {
+  // Create and add dialog to the DOM
+  const dialog = document.createElement('div');
+  dialog.className = 'confirmation-dialog';
+  
+  dialog.innerHTML = `
+    <div class="confirmation-content">
+      <div class="confirmation-title">${message}</div>
+      <div class="confirmation-actions">
+        <button class="cancel">Annulla</button>
+        <button class="confirm">Conferma</button>
+      </div>
+    </div>
+  `;
+  
+  // Add event listeners
+  dialog.querySelector('.cancel').addEventListener('click', () => {
+    document.body.removeChild(dialog);
+    if (onCancel) onCancel();
+  });
+  
+  dialog.querySelector('.confirm').addEventListener('click', () => {
+    document.body.removeChild(dialog);
+    onConfirm();
+  });
+  
+  // Append to body and make visible
+  document.body.appendChild(dialog);
+  setTimeout(() => dialog.classList.add('active'), 10);
 }

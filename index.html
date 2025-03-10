@@ -116,6 +116,14 @@
   <footer></footer>
 
   <script src="script.js"></script>
+  <script>
+    // Initialize toast container
+    document.addEventListener('DOMContentLoaded', function() {
+      const toastContainer = document.createElement('div');
+      toastContainer.className = 'toast-container';
+      document.body.appendChild(toastContainer);
+    });
+  </script>
 </body>
 
 </html>
