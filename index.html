@@ -25,7 +25,67 @@
       <div id="sous-chef"></div>
       <div id="pasticcere"></div>
     </div>
-    <div id="prenotazioni" class="sezione-contenuto"></div>
+    <div id="prenotazioni" class="sezione-contenuto">
+      <!-- Admin Dashboard -->
+      <div id="admin-dashboard" style="display: none;">
+        <h2>Gestione Prenotazioni</h2>
+        <div id="admin-reservations">
+          <table id="reservations-table">
+            <thead>
+              <tr>
+                <th>Nome</th>
+                <th>Data</th>
+                <th>Ora</th>
+                <th>Persone</th>
+                <th>Contatto</th>
+                <th>Azioni</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <button id="admin-logout" class="logout-btn">Logout</button>
+      </div>
+
+      <!-- Client Reservation Area -->
+      <div id="client-area" style="display: none;">
+        <h2>Prenota un Tavolo</h2>
+        <div id="reservation-form-container">
+          <form id="reservation-form">
+            <div class="form-row">
+              <label for="nome">Nome</label>
+              <input type="text" id="nome" name="nome" required>
+            </div>
+            <div class="form-row">
+              <label for="data">Data</label>
+              <input type="date" id="data" name="data" required>
+            </div>
+            <div class="form-row">
+              <label for="ora">Ora</label>
+              <input type="time" id="ora" name="ora" required>
+            </div>
+            <div class="form-row">
+              <label for="persone">Numero di persone</label>
+              <input type="number" id="persone" name="persone" min="1" max="20" required>
+            </div>
+            <div class="form-row">
+              <label for="contatto">Contatto (telefono o email)</label>
+              <input type="text" id="contatto" name="contatto" required>
+            </div>
+            <button type="submit">Prenota</button>
+          </form>
+        </div>
+        
+        <div id="my-reservations">
+          <h3>Le Mie Prenotazioni</h3>
+          <div id="client-reservations-container"></div>
+        </div>
+        
+        <button id="client-logout" class="logout-btn">Logout</button>
+      </div>
+      
+      <!-- Login area is already in the document -->
+    </div>
   </div>
 
   <div class="auth-container">

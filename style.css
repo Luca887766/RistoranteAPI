@@ -1134,3 +1134,170 @@ footer iframe.map {
 #reservation-form button:hover {
   background-color: #4b0925;
 }
+
+/* Reservation Management Styles */
+#admin-dashboard, #client-area {
+  width: 100%;
+  background-color: #fff;
+  padding: 2rem;
+  border-radius: 0.75rem;
+  box-shadow: 0 0 1rem rgba(0, 0, 0, 0.1);
+}
+
+#admin-dashboard h2, #client-area h2 {
+  color: #270514;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+#reservations-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.5rem 0;
+  background-color: white;
+}
+
+#reservations-table th, 
+#reservations-table td {
+  padding: 0.75rem 1rem;
+  text-align: left;
+  border-bottom: 1px solid #eee;
+}
+
+#reservations-table th {
+  background-color: #270514;
+  color: white;
+  font-weight: 500;
+}
+
+#reservations-table tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+#reservations-table tr:hover {
+  background-color: #f1f1f1;
+}
+
+.edit-btn, .delete-btn {
+  border: none;
+  padding: 0.5rem 0.75rem;
+  margin: 0 0.25rem;
+  border-radius: 0.25rem;
+  cursor: pointer;
+  font-size: 0.875rem;
+  transition: background-color 0.3s ease;
+}
+
+.edit-btn {
+  background-color: #4285f4;
+  color: white;
+}
+
+.edit-btn:hover {
+  background-color: #3367d6;
+}
+
+.delete-btn {
+  background-color: #ea4335;
+  color: white;
+}
+
+.delete-btn:hover {
+  background-color: #d33426;
+}
+
+.logout-btn {
+  display: block;
+  margin: 2rem auto 0;
+  padding: 0.75rem 2rem;
+  background-color: #757575;
+  color: white;
+  border: none;
+  border-radius: 0.25rem;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background-color 0.3s ease;
+}
+
+.logout-btn:hover {
+  background-color: #616161;
+}
+
+/* Client Reservation Card Styles */
+#my-reservations {
+  margin-top: 2.5rem;
+}
+
+#my-reservations h3 {
+  color: #270514;
+  margin-bottom: 1rem;
+  font-size: 1.4rem;
+}
+
+.reservation-card {
+  background-color: white;
+  border: 1px solid #eee;
+  border-radius: 0.5rem;
+  padding: 1.25rem;
+  margin-bottom: 1rem;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.reservation-details h4 {
+  color: #270514;
+  margin-bottom: 0.5rem;
+  font-size: 1.1rem;
+}
+
+.reservation-details p {
+  color: #666;
+  margin: 0.25rem 0;
+  font-size: 0.95rem;
+}
+
+/* Modal Styles for Editing Reservations */
+.modal {
+  display: flex;
+  position: fixed;
+  z-index: 10000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-content {
+  background-color: #fff;
+  padding: 2rem;
+  border-radius: 0.5rem;
+  box-shadow: 0 0 2rem rgba(0, 0, 0, 0.3);
+  width: 90%;
+  max-width: 35rem;
+  position: relative;
+}
+
+.close {
+  position: absolute;
+  top: 1rem;
+  right: 1.25rem;
+  font-size: 1.5rem;
+  font-weight: bold;
+  cursor: pointer;
+  color: #666;
+}
+
+.close:hover {
+  color: #270514;
+}
+
+.modal-content h3 {
+  color: #270514;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}

@@ -29,21 +29,41 @@ function mostraSezione(idSezione) {
   }, 300);
 }
 
-// New function to handle the display of reservation content based on login status
+// Enhanced function to handle the display of reservation content based on login status
 function updateReservationSection() {
   const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
-  const isAdmin = localStorage.getItem('username') === 'admin';
+  const username = localStorage.getItem('username');
+  const isAdmin = username === 'admin';
 
-  document.getElementById('login-register-container').style.display = isLoggedIn ? 'none' : 'block';
-  document.getElementById('reservation-form-container').style.display = (isLoggedIn && !isAdmin) ? 'block' : 'none';
-  document.getElementById('admin-reservations').style.display = (isLoggedIn && isAdmin) ? 'block' : 'none';
+  // Get elements, safely checking if they exist
+  const loginContainer = document.getElementById('login-register-container');
+  const clientArea = document.getElementById('client-area');
+  const adminDashboard = document.getElementById('admin-dashboard');
 
-  if (isAdmin) {
-    fetchReservations();
+  // Only update display if elements exist
+  if (loginContainer) {
+    loginContainer.style.display = isLoggedIn ? 'none' : 'block';
+  }
+  
+  if (clientArea) {
+    clientArea.style.display = (isLoggedIn && !isAdmin) ? 'block' : 'none';
+  }
+  
+  if (adminDashboard) {
+    adminDashboard.style.display = (isLoggedIn && isAdmin) ? 'block' : 'none';
+  }
+
+  if (isLoggedIn) {
+    if (isAdmin) {
+      fetchAdminReservations();
+    } else {
+      fetchClientReservations();
+    }
   }
 }
 
-function fetchReservations() {
+// Fetch all reservations for admin
+function fetchAdminReservations() {
   fetch('api.php?action=get_reservations')
     .then(response => response.json())
     .then(data => {
@@ -52,7 +72,7 @@ function fetchReservations() {
         return;
       }
 
-      const tableBody = document.querySelector('#admin-reservations #reservations-table tbody');
+      const tableBody = document.querySelector('#reservations-table tbody');
       tableBody.innerHTML = '';
 
       data.forEach(reservation => {
@@ -63,11 +83,266 @@ function fetchReservations() {
           <td>${reservation.ora}</td>
           <td>${reservation.persone}</td>
           <td>${reservation.contatto}</td>
+          <td>
+            <button class="edit-btn" data-id="${reservation.id}">Modifica</button>
+            <button class="delete-btn" data-id="${reservation.id}">Elimina</button>
+          </td>
         `;
         tableBody.appendChild(row);
       });
+
+      // Add event listeners to edit and delete buttons
+      document.querySelectorAll('.edit-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+          const id = this.getAttribute('data-id');
+          editReservation(id);
+        });
+      });
+
+      document.querySelectorAll('.delete-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+          const id = this.getAttribute('data-id');
+          if (confirm('Sei sicuro di voler eliminare questa prenotazione?')) {
+            deleteReservation(id);
+          }
+        });
+      });
     })
     .catch(error => console.error('Error fetching reservations:', error));
+}
+
+// Fetch user's reservations
+function fetchClientReservations() {
+  fetch('api.php?action=get_user_reservations')
+    .then(response => response.json())
+    .then(data => {
+      if (data.error) {
+        console.error(data.error);
+        return;
+      }
+
+      const container = document.getElementById('client-reservations-container');
+      container.innerHTML = '';
+
+      if (data.length === 0) {
+        container.innerHTML = '<p>Non hai ancora effettuato prenotazioni.</p>';
+        return;
+      }
+
+      data.forEach(reservation => {
+        const card = document.createElement('div');
+        card.classList.add('reservation-card');
+        card.innerHTML = `
+          <div class="reservation-details">
+            <h4>Prenotazione per ${reservation.persone} persone</h4>
+            <p>Data: ${reservation.data} alle ${reservation.ora}</p>
+            <p>Nome: ${reservation.nome_cliente}</p>
+            <p>Contatto: ${reservation.contatto}</p>
+          </div>
+          <div class="reservation-actions">
+            <button class="delete-btn" data-id="${reservation.id}">Cancella</button>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+
+      // Add event listeners to delete buttons
+      document.querySelectorAll('#client-reservations-container .delete-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+          const id = this.getAttribute('data-id');
+          if (confirm('Sei sicuro di voler cancellare questa prenotazione?')) {
+            deleteReservation(id, true);
+          }
+        });
+      });
+    })
+    .catch(error => console.error('Error fetching user reservations:', error));
+}
+
+// Edit reservation function
+function editReservation(id) {
+  fetch(`api.php?action=get_reservation&id=${id}`)
+    .then(response => response.json())
+    .then(data => {
+      if (data.error) {
+        alert(data.error);
+        return;
+      }
+
+      // Create a modal for editing
+      const modal = document.createElement('div');
+      modal.classList.add('modal');
+      modal.innerHTML = `
+        <div class="modal-content">
+          <span class="close">&times;</span>
+          <h3>Modifica Prenotazione</h3>
+          <form id="edit-form">
+            <input type="hidden" id="edit-id" value="${data.id}">
+            <div class="form-row">
+              <label for="edit-nome">Nome</label>
+              <input type="text" id="edit-nome" value="${data.nome_cliente}" required>
+            </div>
+            <div class="form-row">
+              <label for="edit-data">Data</label>
+              <input type="date" id="edit-data" value="${data.data}" required>
+            </div>
+            <div class="form-row">
+              <label for="edit-ora">Ora</label>
+              <input type="time" id="edit-ora" value="${data.ora}" required>
+            </div>
+            <div class="form-row">
+              <label for="edit-persone">Numero di persone</label>
+              <input type="number" id="edit-persone" value="${data.persone}" min="1" max="20" required>
+            </div>
+            <div class="form-row">
+              <label for="edit-contatto">Contatto</label>
+              <input type="text" id="edit-contatto" value="${data.contatto}" required>
+            </div>
+            <button type="submit">Salva Modifiche</button>
+          </form>
+        </div>
+      `;
+      
+      document.body.appendChild(modal);
+      
+      // Close button functionality
+      modal.querySelector('.close').addEventListener('click', () => {
+        document.body.removeChild(modal);
+      });
+      
+      // Submit form functionality
+      modal.querySelector('#edit-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const formData = {
+          id: document.getElementById('edit-id').value,
+          nome_cliente: document.getElementById('edit-nome').value,
+          data: document.getElementById('edit-data').value,
+          ora: document.getElementById('edit-ora').value,
+          persone: document.getElementById('edit-persone').value,
+          contatto: document.getElementById('edit-contatto').value
+        };
+        
+        updateReservation(formData, modal);
+      });
+    })
+    .catch(error => console.error('Error getting reservation details:', error));
+}
+
+// Update reservation
+function updateReservation(formData, modal) {
+  const body = new URLSearchParams();
+  for (const key in formData) {
+    body.append(key, formData[key]);
+  }
+  
+  fetch('api.php?action=update_reservation', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+    body: body.toString()
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      alert('Prenotazione aggiornata con successo');
+      document.body.removeChild(modal);
+      fetchAdminReservations();
+    } else {
+      alert(data.error || 'Errore durante l\'aggiornamento');
+    }
+  })
+  .catch(error => console.error('Error updating reservation:', error));
+}
+
+// Delete reservation
+function deleteReservation(id, isClient = false) {
+  fetch('api.php?action=delete_reservation', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+    body: `id=${id}`
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      alert('Prenotazione eliminata con successo');
+      if (isClient) {
+        fetchClientReservations();
+      } else {
+        fetchAdminReservations();
+      }
+    } else {
+      alert(data.error || 'Errore durante l\'eliminazione');
+    }
+  })
+  .catch(error => console.error('Error deleting reservation:', error));
+}
+
+// Modify the form submission handler for creating reservations
+function setupReservationForm() {
+  const form = document.getElementById('reservation-form');
+  if (form) {
+    form.addEventListener('submit', function(event) {
+      event.preventDefault();
+      
+      const formData = {
+        nome: document.getElementById('nome').value,
+        data: document.getElementById('data').value,
+        ora: document.getElementById('ora').value,
+        persone: document.getElementById('persone').value,
+        contatto: document.getElementById('contatto').value
+      };
+      
+      const body = new URLSearchParams();
+      for (const key in formData) {
+        body.append(key, formData[key]);
+      }
+      
+      fetch('api.php?action=create_reservation', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+        body: body.toString()
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          alert('Prenotazione effettuata con successo');
+          form.reset();
+          fetchClientReservations();
+        } else {
+          alert(data.error || 'Errore durante la prenotazione');
+        }
+      })
+      .catch(error => console.error('Error creating reservation:', error));
+    });
+  }
+}
+
+// Add logout functionality
+function setupLogout() {
+  const adminLogout = document.getElementById('admin-logout');
+  const clientLogout = document.getElementById('client-logout');
+  
+  const logoutHandler = function() {
+    fetch('api.php?action=logout')
+      .then(response => response.json())
+      .then(data => {
+        localStorage.removeItem('isLoggedIn');
+        localStorage.removeItem('username');
+        alert('Logout effettuato con successo');
+        updateReservationSection();
+      })
+      .catch(error => console.error('Error during logout:', error));
+  };
+  
+  if (adminLogout) adminLogout.addEventListener('click', logoutHandler);
+  if (clientLogout) clientLogout.addEventListener('click', logoutHandler);
+}
+
+// Update caricaPrenotazioni function
+function caricaPrenotazioni() {
+  setupReservationForm();
+  setupLogout();
+  updateReservationSection();
 }
 
 async function caricaMenuGiornaliero() {
@@ -261,46 +536,6 @@ function caricaChef() {
   }).catch(error => {
     console.error("Errore nel caricamento del JSON", error);
   });
-}
-
-// Funzione per generare il modulo di prenotazione e il calendario
-function caricaPrenotazioni() {
-  // This function should NOT handle login/register forms anymore
-  // We now have a separate event handler for that
-  
-  // Only handle reservation form if it exists
-  const reservationForm = document.getElementById('reservation-form');
-  if (reservationForm) {
-    reservationForm.addEventListener('submit', function (event) {
-      event.preventDefault();
-      const nome = document.getElementById('nome').value;
-      const data = document.getElementById('data').value;
-      const ora = document.getElementById('ora').value;
-      const persone = document.getElementById('persone').value;
-      const contatto = document.getElementById('contatto').value;
-
-      fetch('api.php?action=create_reservation', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: `nome=${nome}&data=${data}&ora=${ora}&persone=${persone}&contatto=${contatto}`,
-      })
-        .then(response => response.json())
-        .then(data => {
-          if (data.success) {
-            alert(data.success);
-            reservationForm.reset();
-          } else {
-            alert(data.error);
-          }
-        })
-        .catch(error => console.error('Error creating reservation:', error));
-    });
-  }
-
-  // Initial update of reservation section based on login status
-  updateReservationSection();
 }
 
 // Mappa le funzioni ai target
@@ -618,27 +853,25 @@ function setupLoginRegister() {
       return;
     }
     
-    // Test the API connection first
-    console.log(`Attempting to login with username: ${username}`);
-    
     fetch('api.php?action=login', {
       method: 'POST',
       headers: {'Content-Type': 'application/x-www-form-urlencoded'},
       body: `username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`
     })
-    .then(response => {
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
-      }
-      return response.json();
-    })
+    .then(r => r.json())
     .then(data => {
-      console.log("Login response:", data);
       if(data.success) {
         localStorage.setItem('isLoggedIn', 'true');
         localStorage.setItem('username', data.username);
+        
+        // Navigate to prenotazioni section after successful login
+        mostraSezione('prenotazioni');
+        document.querySelectorAll('#SecondaBarraOrizzontale a').forEach(l2 => {
+          l2.classList.remove('selected');
+        });
+        document.querySelector('#SecondaBarraOrizzontale a[data-target="prenotazioni"]').classList.add('selected');
+        
         updateReservationSection();
-        alert('Login successful');
       } else {
         if (loginError) loginError.textContent = data.error || 'Login failed.';
       }
