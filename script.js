@@ -724,8 +724,9 @@ function fillReservationFormWithEventData(evento) {
   const personeInput = document.getElementById('persone');
   
   if (nomeInput && dataInput) {
-    // Set the name to event name
-    nomeInput.value = evento.nome;
+    // Set the name to username instead of event name
+    const username = localStorage.getItem('username');
+    nomeInput.value = username || ''; // Use username if available
     
     // Set the date to event date
     dataInput.value = evento.data;
