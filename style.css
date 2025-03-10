@@ -991,21 +991,27 @@ footer iframe.map {
   transform: translateX(100%);
 }
 
+/* Tab Button Styling - Updated to Light Style */
 .form-toggle button {
   flex: 1;
   padding: 1rem 0;
   font-size: 1.2rem;
   font-weight: 500;
-  color: #666;
+  color: #200514;
+  background-color: #ffdeec;
   border: none;
-  background-color: transparent;
   cursor: pointer;
-  transition: color 0.3s ease;
+  transition: background-color 0.3s ease;
+}
+
+.form-toggle button:hover {
+  background-color: #ffcee3;
 }
 
 .form-toggle button.active {
-  color: #270514;
+  color: #200514;
   font-weight: 600;
+  background-color: #ffcee3;
 }
 
 #login-form,
@@ -1043,13 +1049,15 @@ footer iframe.map {
   outline: none;
 }
 
+/* Login/Register Submit Button Styling - Dark Style */
 #login-form button[type="submit"],
 #register-form button[type="submit"] {
   padding: 1rem;
   font-size: 1.2em;
-  color: #200514;
-  background-color: #ffdeec;
+  color: white;
+  background-color: #270514;
   border: none;
+  border-radius: 0.5rem;
   cursor: pointer;
   transition: background-color 0.3s ease;
   margin-top: 0.5rem;
@@ -1057,7 +1065,7 @@ footer iframe.map {
 
 #login-form button[type="submit"]:hover,
 #register-form button[type="submit"]:hover {
-  background-color: #ffcee3;
+  background-color: #4b0925;
 }
 
 .error-message {
