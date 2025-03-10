@@ -578,26 +578,28 @@ function setupLoginRegister() {
 
   function showLoginForm() {
     formToggle.setAttribute('data-active', 'login');
-    loginForm.classList.remove('hidden');
-    registerForm.classList.remove('visible');
     loginTab.classList.add('active');
     registerTab.classList.remove('active');
+    
+    // Reset error messages
     if (loginError) loginError.textContent = '';
     if (registerError) registerError.textContent = '';
-    // Make register form display:none for accessibility reasons
-    registerForm.style.display = 'none';
+    
+    // Simple display toggle instead of animation to fix bugs
     loginForm.style.display = 'flex';
+    registerForm.style.display = 'none';
   }
 
   function showRegisterForm() {
     formToggle.setAttribute('data-active', 'register');
-    loginForm.classList.add('hidden');
-    registerForm.classList.add('visible');
     registerTab.classList.add('active');
     loginTab.classList.remove('active');
+    
+    // Reset error messages
     if (loginError) loginError.textContent = '';
     if (registerError) registerError.textContent = '';
-    // Make login form display:none for accessibility reasons
+    
+    // Simple display toggle instead of animation to fix bugs
     loginForm.style.display = 'none';
     registerForm.style.display = 'flex';
   }
@@ -616,13 +618,22 @@ function setupLoginRegister() {
       return;
     }
     
+    // Test the API connection first
+    console.log(`Attempting to login with username: ${username}`);
+    
     fetch('api.php?action=login', {
       method: 'POST',
       headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-      body: `username=${username}&password=${password}`
+      body: `username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`
     })
-    .then(r => r.json())
+    .then(response => {
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+      return response.json();
+    })
     .then(data => {
+      console.log("Login response:", data);
       if(data.success) {
         localStorage.setItem('isLoggedIn', 'true');
         localStorage.setItem('username', data.username);
@@ -656,13 +667,22 @@ function setupLoginRegister() {
       return;
     }
     
+    // Test the API connection first
+    console.log(`Attempting to register with username: ${username}`);
+    
     fetch('api.php?action=register', {
       method: 'POST',
       headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-      body: `username=${username}&password=${password}`
+      body: `username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`
     })
-    .then(r => r.json())
+    .then(response => {
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+      return response.json();
+    })
     .then(data => {
+      console.log("Registration response:", data);
       if(data.success) {
         alert('Registration successful');
         showLoginForm();

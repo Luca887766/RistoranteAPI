@@ -1018,87 +1018,43 @@ footer iframe.map {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
-  transition: opacity 0.3s ease, transform 0.3s ease;
-}
-
-#register-form {
-  position: absolute;
-  top: 0;
-  left: 0;
   width: 100%;
-  opacity: 0;
-  transform: translateX(20px);
-  pointer-events: none;
-}
-
-#register-form.visible {
+  position: static; /* Remove absolute positioning */
   opacity: 1;
-  transform: translateX(0);
-  pointer-events: all;
+  transform: none;
 }
 
+/* Remove problematic animations */
+#register-form.visible,
 #login-form.hidden {
-  opacity: 0;
-  transform: translateX(-20px);
-  pointer-events: none;
+  opacity: 1;
+  transform: none;
+  pointer-events: auto;
 }
 
-#login-register-container input {
-  padding: 0.75rem 1rem;
-  border: 1px solid #dadce0; /* Google input border */
-  border-radius: 0.25rem;
-  font-size: 1rem;
-  transition: border-color 0.3s ease, box-shadow 0.3s ease;
-  color: #202124; /* Google text color */
-}
-
-#login-register-container input:focus {
-  outline: none;
-  border-color: #9c27b0; /* Google-inspired purple */
-  box-shadow: 0 0 0 1px rgba(156, 39, 176, 0.3);
-}
-
-#login-register-container input::placeholder {
-  color: #80868b; /* Google placeholder color */
-}
-
+/* Fix form buttons */
 #login-register-container button[type="submit"] {
-  margin-top: 0.5rem;
+  margin-top: 1rem;
   padding: 0.75rem;
-  background-color: #9c27b0; /* Google-inspired purple */
-  color: #fff;
+  background-color: #9c27b0;
+  color: white;
   border: none;
   border-radius: 0.25rem;
-  font-size: 1rem;
   font-weight: 500;
   cursor: pointer;
-  transition: background-color 0.3s ease, box-shadow 0.3s ease;
-  text-transform: uppercase;
-  letter-spacing: 0.05rem;
+  transition: background-color 0.3s;
 }
 
 #login-register-container button[type="submit"]:hover {
-  background-color: #7b1fa2; /* Darker purple */
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  background-color: #7b1fa2;
 }
 
-#login-register-container button[type="submit"]:active {
-  background-color: #6a1b9a; /* Even darker purple */
-}
-
+/* Fix error messages */
 .error-message {
-  color: #d93025; /* Google error red */
-  font-size: 0.8rem;
-  min-height: 1rem;
+  color: #d93025;
+  font-size: 0.875rem;
   margin-top: 0.5rem;
-  transition: opacity 0.3s ease;
-}
-
-@media (max-width: 30rem) {
-  #login-register-container {
-    padding: 1.5rem;
-    width: 100%;
-  }
+  min-height: 1.25rem;
 }
 
 #register-form {
