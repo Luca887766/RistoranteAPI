@@ -1576,3 +1576,84 @@ footer iframe.map {
   width: 100%;
   max-width: 100%;
 }
+
+/* Hourly view styles */
+#hourly-view-container {
+  margin-bottom: 2rem;
+  background-color: #fff;
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+  box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.1);
+}
+
+.hourly-view-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+}
+
+#current-date-display {
+  margin: 0;
+  font-size: 1.4rem;
+  color: #270514;
+  text-transform: capitalize;
+}
+
+.day-nav-btn {
+  padding: 0.6rem 1rem;
+  background-color: #270514;
+  color: white;
+  border: none;
+  border-radius: 0.25rem;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background-color 0.3s ease;
+}
+
+.day-nav-btn:hover {
+  background-color: #4b0925;
+}
+
+.hourly-stats {
+  background-color: #f9f9f9;
+  border-radius: 0.5rem;
+  padding: 1rem;
+}
+
+.hourly-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 1rem;
+}
+
+.hourly-table th,
+.hourly-table td {
+  padding: 0.75rem;
+  text-align: center;
+  border-bottom: 1px solid #eee;
+}
+
+.hourly-table th {
+  background-color: #270514;
+  color: white;
+  font-weight: 500;
+}
+
+.hourly-table tr:nth-child(even) {
+  background-color: rgba(255, 255, 255, 0.6);
+}
+
+.hourly-table tr:hover {
+  background-color: rgba(255, 255, 255, 0.9);
+}
+
+.hourly-totals {
+  display: flex;
+  justify-content: flex-end;
+  gap: 2rem;
+  font-weight: bold;
+  font-size: 1.1rem;
+  margin-top: 1rem;
+  color: #270514;
+}

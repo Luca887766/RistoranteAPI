@@ -105,10 +105,10 @@ function updateReservationSection() {
   if (isLoggedIn) {
     if (isAdmin) {
       fetchAdminReservations();
-      adminPollingInterval = setInterval(fetchAdminReservations, 2000);
+      adminPollingInterval = setInterval(fetchAdminReservations, 5000);
     } else {
       fetchClientReservations();
-      clientPollingInterval = setInterval(fetchClientReservations, 2000);
+      clientPollingInterval = setInterval(fetchClientReservations, 5000);
     }
   }
   
@@ -487,6 +487,9 @@ function fetchAdminReservations() {
         row.appendChild(actionsCell);
         tableBody.appendChild(row);
       });
+      
+      // Setup hourly view after fetching reservations
+      setupHourlyView();
     })
     .catch(error => console.error('Error fetching reservations:', error));
 }
@@ -1615,3 +1618,151 @@ document.addEventListener('DOMContentLoaded', () => {
 
 window.addEventListener('beforeunload', clearPollingIntervals);
 window.addEventListener('pagehide', clearPollingIntervals);
+
+function deleteReservation(id, isClientView = false) {
+  const body = new URLSearchParams();
+  body.append('id', id);
+  
+  fetch('api.php?action=delete_reservation', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+    body: body.toString()
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      showToast('Prenotazione cancellata con successo', 'success');
+      if (isClientView) {
+        fetchClientReservations();
+      } else {
+        fetchAdminReservations();
+      }
+    } else {
+      showToast(data.error || 'Errore durante la cancellazione', 'error');
+    }
+  })
+  .catch(error => {
+    console.error('Error deleting reservation:', error);
+    showToast('Errore di connessione. Riprova più tardi.', 'error');
+  });
+}
+
+// Admin hourly view functionality
+function setupHourlyView() {
+  const prevDayBtn = document.getElementById('prev-day');
+  const nextDayBtn = document.getElementById('next-day');
+  
+  if (!prevDayBtn || !nextDayBtn) return;
+  
+  // Remove existing event listeners
+  const newPrevDayBtn = prevDayBtn.cloneNode(true);
+  const newNextDayBtn = nextDayBtn.cloneNode(true);
+  prevDayBtn.parentNode.replaceChild(newPrevDayBtn, prevDayBtn);
+  nextDayBtn.parentNode.replaceChild(newNextDayBtn, nextDayBtn);
+  
+  // Get current displayed date or use today
+  window.currentHourlyViewDate = window.currentHourlyViewDate || new Date();
+  
+  // Update display
+  updateDateDisplay();
+  loadHourlyData(window.currentHourlyViewDate);
+  
+  // Add event listeners
+  newPrevDayBtn.addEventListener('click', () => {
+    const prevDate = new Date(window.currentHourlyViewDate);
+    prevDate.setDate(prevDate.getDate() - 1);
+    window.currentHourlyViewDate = prevDate;
+    updateDateDisplay();
+    loadHourlyData(prevDate);
+  });
+  
+  newNextDayBtn.addEventListener('click', () => {
+    const nextDate = new Date(window.currentHourlyViewDate);
+    nextDate.setDate(nextDate.getDate() + 1);
+    window.currentHourlyViewDate = nextDate;
+    updateDateDisplay();
+    loadHourlyData(nextDate);
+  });
+}
+
+function updateDateDisplay() {
+  const dateDisplay = document.getElementById('current-date-display');
+  if (!dateDisplay) return;
+  
+  const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+  dateDisplay.textContent = window.currentHourlyViewDate.toLocaleDateString('it-IT', options);
+}
+
+function loadHourlyData(date) {
+  const formattedDate = date.toISOString().split('T')[0];
+  
+  fetch(`api.php?action=get_hourly_reservations&date=${formattedDate}`)
+    .then(response => response.json())
+    .then(data => {
+      if (data.error) {
+        showToast(data.error, 'error');
+        return;
+      }
+      
+      displayHourlyData(data);
+    })
+    .catch(error => {
+      console.error('Error loading hourly data:', error);
+      showToast('Errore durante il caricamento dei dati orari', 'error');
+    });
+}
+
+function displayHourlyData(data) {
+  const hourlyStatsContent = document.getElementById('hourly-stats-content');
+  const totalCovers = document.getElementById('total-covers');
+  const totalReservations = document.getElementById('total-reservations');
+  
+  if (!hourlyStatsContent || !totalCovers || !totalReservations) return;
+  
+  hourlyStatsContent.innerHTML = '';
+  
+  // Create table
+  const table = document.createElement('table');
+  table.className = 'hourly-table';
+  
+  // Create header
+  const headerRow = document.createElement('tr');
+  const timeHeader = document.createElement('th');
+  timeHeader.textContent = 'Orario';
+  headerRow.appendChild(timeHeader);
+  
+  const reservationsHeader = document.createElement('th');
+  reservationsHeader.textContent = 'Prenotazioni';
+  headerRow.appendChild(reservationsHeader);
+  
+  const coversHeader = document.createElement('th');
+  coversHeader.textContent = 'Coperti';
+  headerRow.appendChild(coversHeader);
+  
+  table.appendChild(headerRow);
+  
+  // Add rows for each hour
+  Object.entries(data.hourly_data).forEach(([hour, stats]) => {
+    const row = document.createElement('tr');
+    
+    const timeCell = document.createElement('td');
+    timeCell.textContent = hour;
+    row.appendChild(timeCell);
+    
+    const reservationsCell = document.createElement('td');
+    reservationsCell.textContent = stats.reservations;
+    row.appendChild(reservationsCell);
+    
+    const coversCell = document.createElement('td');
+    coversCell.textContent = stats.covers;
+    row.appendChild(coversCell);
+    
+    table.appendChild(row);
+  });
+  
+  hourlyStatsContent.appendChild(table);
+  
+  // Update totals
+  totalCovers.textContent = data.totals.covers;
+  totalReservations.textContent = data.totals.reservations;
+}
