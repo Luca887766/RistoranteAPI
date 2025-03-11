@@ -1242,13 +1242,21 @@ footer iframe.map {
 }
 
 #client-area {
-  width: 30rem;
-  max-width: 50rem;
+  width: 50rem;
   background-color: #fff;
   padding: 2rem;
   border-radius: 0.75rem;
   box-shadow: 0 0 1rem rgba(0, 0, 0, 0.1);
   margin: 0 auto;
+}
+
+@media (max-width: 52rem) {
+  #client-area {
+    width: 100%;
+  }
+  #prenotazioni {
+    width: 100%;
+  }
 }
 
 #admin-dashboard h2, #client-area h2 {

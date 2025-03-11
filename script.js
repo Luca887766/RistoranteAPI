@@ -130,8 +130,15 @@ function initializeReservationForm() {
     const formattedDate = today.toISOString().split('T')[0];
     dateInput.min = formattedDate;
     
-    // Set default date to today only if not coming from an event booking
-    if (!sessionStorage.getItem('eventToBook')) {
+    // Check for pending event booking
+    const pendingEventData = sessionStorage.getItem('eventToBook');
+    if (pendingEventData) {
+      try {
+        const evento = JSON.parse(pendingEventData);
+      } catch (error) {
+        dateInput.value = formattedDate;
+      }
+    } else {
       dateInput.value = formattedDate;
     }
     
@@ -765,8 +772,9 @@ function prenotaEvento(evento, e) {
   const buttonElement = e.currentTarget;
   createStars(buttonElement);
   
-  // Store event data in session storage
+  // Store event data in session storage to preserve it during navigation
   sessionStorage.setItem('eventToBook', JSON.stringify(evento));
+  console.log("Event data saved:", evento);
   
   // Navigate to prenotazioni section
   mostraSezione('prenotazioni');
@@ -780,7 +788,10 @@ function prenotaEvento(evento, e) {
   // Check if user is logged in before accessing form
   const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
   if (isLoggedIn) {
-    fillReservationFormWithEventData(evento);
+    // Use a small delay to ensure the form is loaded
+    setTimeout(() => {
+      fillReservationFormWithEventData(evento);
+    }, 300);
   }
 }
 
@@ -1351,17 +1362,36 @@ function fillReservationFormWithEventData(evento) {
   const nomeInput = document.getElementById('nome');
   const dataInput = document.getElementById('data');
   const personeInput = document.getElementById('persone');
-  const contattoInput = document.getElementById('contatto');
   
-  if (nomeInput && dataInput) {
-    // Set the name to username if logged in
-    const username = localStorage.getItem('username');
-    if (username) {
-      nomeInput.value = username;
+  console.log("Setting event data:", evento);
+  
+  if (dataInput) {
+    // Format date if needed (ensuring YYYY-MM-DD format)
+    try {
+      // Set the date to event date - handling different possible formats
+      const eventDate = new Date(evento.data);
+      const formattedDate = eventDate.toISOString().split('T')[0]; // Format as YYYY-MM-DD
+      dataInput.value = formattedDate;
+      console.log("Event date set to:", formattedDate);
+      
+      // Ensure the date input respects min/max constraints
+      const today = new Date();
+      dataInput.min = today.toISOString().split('T')[0];
+      
+      // If date input has validation constraints, trigger validation
+      const event = new Event('change');
+      dataInput.dispatchEvent(event);
+    } catch (e) {
+      console.error("Error setting event date:", e);
     }
     
-    // Set the date to event date
-    dataInput.value = evento.data;
+    // Set the name to username if logged in
+    if (nomeInput) {
+      const username = localStorage.getItem('username');
+      if (username) {
+        nomeInput.value = username;
+      }
+    }
     
     // Default to 2 people if not set already
     if (personeInput && !personeInput.value) {
@@ -1376,6 +1406,10 @@ function fillReservationFormWithEventData(evento) {
     
     // Show a toast notification about the event booking
     showToast(`Stai prenotando per l'evento: ${evento.nome}`, 'info');
+  } else {
+    console.error("Date input element not found");
+    // Save the event data to try again later
+    sessionStorage.setItem('eventToBook', JSON.stringify(evento));
   }
 }
 
