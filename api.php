@@ -433,7 +433,7 @@ function checkTimeSlotAvailability($conn) {
     
     // Get all reservations that would overlap with the requested time slot
     $bookingStart = $time;
-    $bookingEnd = date('H:i', strtotime($time) + 5400); // Add 90 minutes (1.5 hours)
+    $bookingEnd = date('H:i', strtotime($time) + 5400);
     
     $stmt = $conn->prepare("
         SELECT SUM(persone) as total FROM reservations 

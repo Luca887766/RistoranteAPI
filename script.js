@@ -214,7 +214,11 @@ function setupReservationForm() {
   const error = document.getElementById('reservation-error');
   
   if (form) {
-    form.addEventListener('submit', function(event) {
+    // Remove any existing submit handlers by cloning the form
+    const newForm = form.cloneNode(true);
+    form.parentNode.replaceChild(newForm, form);
+    
+    newForm.addEventListener('submit', function(event) {
       event.preventDefault();
       
       if (error) error.textContent = '';
@@ -266,7 +270,7 @@ function setupReservationForm() {
           .then(data => {
             if (data.success) {
               showToast('Prenotazione effettuata con successo', 'success');
-              form.reset();
+              newForm.reset();  // Use the new form reference
               fetchClientReservations();
             } else {
               showToast(data.error || 'Errore durante la prenotazione', 'error');
@@ -287,7 +291,11 @@ function setupReservationForm() {
     // Add event listeners for validations
     const personeInput = document.getElementById('persone');
     if (personeInput) {
-      personeInput.addEventListener('change', function() {
+      // Remove any existing event listeners by cloning
+      const newPersoneInput = personeInput.cloneNode(true);
+      personeInput.parentNode.replaceChild(newPersoneInput, personeInput);
+      
+      newPersoneInput.addEventListener('change', function() {
         const value = parseInt(this.value);
         if (value > 20) {
           this.value = 20;
@@ -524,47 +532,58 @@ function setupLogout() {
   const adminLogout = document.getElementById('admin-logout');
   const clientLogout = document.getElementById('client-logout');
   
-  const logoutHandler = function() {
-    fetch('api.php?action=logout')
-      .then(response => response.json())
-      .then(data => {
-        localStorage.removeItem('isLoggedIn');
-        localStorage.removeItem('username');
-        showToast('Logout effettuato con successo', 'success');
-        
-        // Reset all forms in the document
-        document.querySelectorAll('form').forEach(form => {
-          form.reset();
-        });
-        
-        // Clear specific reservation fields
-        const formFields = ['nome', 'data', 'ora', 'persone', 'contatto'];
-        formFields.forEach(field => {
-          const element = document.getElementById(field);
-          if (element) element.value = '';
-        });
-        
-        // Scroll to top
-        window.scrollTo({
-          top: 0,
-          behavior: 'smooth'
-        });
-        
-        // Return to home section
-        document.querySelectorAll('#SecondaBarraOrizzontale a').forEach(link => {
-          link.classList.remove('selected');
-        });
-        document.querySelector('#SecondaBarraOrizzontale a[data-target="menu-giornaliero"]').classList.add('selected');
-        mostraSezione('menu-giornaliero');
-        
-        // Update reservation section UI state
-        updateReservationSection();
-      })
-      .catch(error => console.error('Error during logout:', error));
-  };
+  // Remove any existing event listeners first
+  if (adminLogout) {
+    const newAdminLogout = adminLogout.cloneNode(true);
+    adminLogout.parentNode.replaceChild(newAdminLogout, adminLogout);
+    newAdminLogout.addEventListener('click', logoutHandler);
+  }
   
-  if (adminLogout) adminLogout.addEventListener('click', logoutHandler);
-  if (clientLogout) clientLogout.addEventListener('click', logoutHandler);
+  if (clientLogout) {
+    const newClientLogout = clientLogout.cloneNode(true);
+    clientLogout.parentNode.replaceChild(newClientLogout, clientLogout);
+    newClientLogout.addEventListener('click', logoutHandler);
+  }
+}
+
+// Separate logout handler function to avoid creating new function references
+function logoutHandler() {
+  fetch('api.php?action=logout')
+    .then(response => response.json())
+    .then(data => {
+      localStorage.removeItem('isLoggedIn');
+      localStorage.removeItem('username');
+      showToast('Logout effettuato con successo', 'success');
+      
+      // Reset all forms in the document
+      document.querySelectorAll('form').forEach(form => {
+        form.reset();
+      });
+      
+      // Clear specific reservation fields
+      const formFields = ['nome', 'data', 'ora', 'persone', 'contatto'];
+      formFields.forEach(field => {
+        const element = document.getElementById(field);
+        if (element) element.value = '';
+      });
+      
+      // Scroll to top
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      });
+      
+      // Return to home section
+      document.querySelectorAll('#SecondaBarraOrizzontale a').forEach(link => {
+        link.classList.remove('selected');
+      });
+      document.querySelector('#SecondaBarraOrizzontale a[data-target="menu-giornaliero"]').classList.add('selected');
+      mostraSezione('menu-giornaliero');
+      
+      // Update reservation section UI state
+      updateReservationSection();
+    })
+    .catch(error => console.error('Error during logout:', error));
 }
 
 // Initialize reservation section
@@ -1246,8 +1265,9 @@ function setupLoginRegister() {
 }
 
 // NOTIFICATION SYSTEM
+// Make sure each toast is unique by ensuring we only have one toast container
 function showToast(message, type = 'info', duration = 3000) {
-  // Create toast container if it doesn't exist
+  // Get or create a single toast container
   let container = document.querySelector('.toast-container');
   if (!container) {
     container = document.createElement('div');
@@ -1268,20 +1288,25 @@ function showToast(message, type = 'info', duration = 3000) {
   const closeBtn = document.createElement('button');
   closeBtn.className = 'close-toast';
   closeBtn.innerHTML = '&times;';
-  closeBtn.addEventListener('click', () => removeToast(toast));
+  
+  // Use direct function instead of creating new closures each time
+  closeBtn.onclick = function() { removeToast(toast); };
   toast.appendChild(closeBtn);
   
   // Add toast to container
   container.appendChild(toast);
   
   // Auto-remove after duration
-  setTimeout(() => removeToast(toast), duration);
+  const timeoutId = setTimeout(() => removeToast(toast), duration);
+  
+  // Store the timeout ID so we can clear it if needed
+  toast.dataset.timeoutId = timeoutId;
   
   return toast;
 }
 
 function removeToast(toast) {
-  toast.style.animation = 'fade-out 0.3s forwards';
+  toast.style.animation = 'fade-out 1.5s forwards';
   setTimeout(() => {
     if (toast.parentElement) {
       toast.parentElement.removeChild(toast);
@@ -1465,4 +1490,19 @@ document.addEventListener('DOMContentLoaded', function() {
     childList: true,
     subtree: true
   });
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+  // Clear any previous toast container
+  const existingToastContainer = document.querySelector('.toast-container');
+  if (existingToastContainer) {
+    existingToastContainer.remove();
+  }
+  
+  // Create a fresh toast container
+  const toastContainer = document.createElement('div');
+  toastContainer.className = 'toast-container';
+  document.body.appendChild(toastContainer);
+  
+  // ...existing initialization code...
 });
