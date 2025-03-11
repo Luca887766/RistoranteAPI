@@ -152,21 +152,35 @@ function clearPollingIntervals() {
 function initializeReservationForm() {
   const dateInput = document.getElementById('data');
   if (dateInput) {
-    // Set minimum date to today
-    const today = new Date();
-    const formattedDate = today.toISOString().split('T')[0];
-    dateInput.min = formattedDate;
+    // Set minimum date to tomorrow instead of today
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const formattedTomorrow = tomorrow.toISOString().split('T')[0];
+    dateInput.min = formattedTomorrow;
     
     // Check for pending event booking
     const pendingEventData = sessionStorage.getItem('eventToBook');
     if (pendingEventData) {
       try {
         const evento = JSON.parse(pendingEventData);
+        // Check if event date is in the past or today
+        const eventDate = new Date(evento.data);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        
+        if (eventDate > today && eventDate.toISOString().split('T')[0] !== today.toISOString().split('T')[0]) {
+          // Only set the event date if it's in the future and not today
+          dateInput.value = eventDate.toISOString().split('T')[0];
+          // Check if this date is fully booked
+          checkAndUpdateAvailableDates(dateInput.value);
+        } else {
+          dateInput.value = formattedTomorrow;
+        }
       } catch (error) {
-        dateInput.value = formattedDate;
+        dateInput.value = formattedTomorrow;
       }
     } else {
-      dateInput.value = formattedDate;
+      dateInput.value = formattedTomorrow;
     }
     
     // Set maximum date to 3 months from now
@@ -175,7 +189,15 @@ function initializeReservationForm() {
     dateInput.max = maxDate.toISOString().split('T')[0];
     
     // Add event listener to check availability when date changes
-    dateInput.addEventListener('change', checkDateAvailability);
+    dateInput.addEventListener('change', function(event) {
+      checkDateAvailability(event);
+    });
+    
+    // Initial availability check for selected date
+    checkAndUpdateAvailableDates(dateInput.value);
+    
+    // Start periodic check for date availability updates
+    startAvailabilityChecks();
   }
   
   // Add event listener to check time slot availability
@@ -201,11 +223,99 @@ function initializeReservationForm() {
   }
 }
 
-// Check date availability
+// Function to periodically check for updates to date availability
+function startAvailabilityChecks() {
+  // Check availability once every 30 seconds
+  setInterval(function() {
+    const dateInput = document.getElementById('data');
+    if (dateInput && dateInput.value) {
+      // Check the current selected date and upcoming dates
+      checkAndUpdateAvailableDates(dateInput.value);
+    }
+  }, 30000);
+}
+
+// Function to check availability for a date and update UI accordingly
+function checkAndUpdateAvailableDates(selectedDate) {
+  // Get dates from selected date to selected date + 7 days
+  const startDate = new Date(selectedDate);
+  const endDate = new Date(selectedDate);
+  endDate.setDate(endDate.getDate() + 7);
+  
+  const formattedStart = startDate.toISOString().split('T')[0];
+  const formattedEnd = endDate.toISOString().split('T')[0];
+  
+  fetch(`api.php?action=check_date_range_availability&start=${formattedStart}&end=${formattedEnd}`)
+    .then(response => response.json())
+    .then(data => {
+      if (data.error) {
+        console.error(data.error);
+        return;
+      }
+      
+      // Store fully booked dates in window variable for reference
+      window.fullyBookedDates = data.fullyBookedDates || [];
+      
+      // If currently selected date is fully booked, clear it and show error
+      const dateInput = document.getElementById('data');
+      if (dateInput && window.fullyBookedDates.includes(dateInput.value)) {
+        const error = document.getElementById('reservation-error');
+        if (error) error.textContent = 'La data selezionata è al completo. Scegli un\'altra data.';
+        
+        // Set to next available date
+        const availableDates = getAvailableDates(data.dateAvailability);
+        if (availableDates.length > 0) {
+          dateInput.value = availableDates[0];
+        } else {
+          dateInput.value = ''; // No available dates in range
+        }
+      }
+    })
+    .catch(err => console.error('Error checking date availability:', err));
+}
+
+// Helper function to get the next available date from availability data
+function getAvailableDates(dateAvailability) {
+  const availableDates = [];
+  
+  for (const date in dateAvailability) {
+    if (dateAvailability[date] === true) {
+      availableDates.push(date);
+    }
+  }
+  
+  return availableDates.sort(); // Sort dates chronologically
+}
+
+// Check date availability - modified to handle fully booked dates
 function checkDateAvailability(event) {
   const date = event.target.value;
   const error = document.getElementById('reservation-error');
   
+  // Check if it's today or in the past
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const selectedDate = new Date(date);
+  selectedDate.setHours(0, 0, 0, 0);
+  
+  if (selectedDate <= today) {
+    if (error) error.textContent = 'Non è possibile prenotare per oggi o per date passate. Scegli una data futura.';
+    
+    // Set to tomorrow
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    event.target.value = tomorrow.toISOString().split('T')[0];
+    return;
+  }
+  
+  // Check if date is in the fully booked list
+  if (window.fullyBookedDates && window.fullyBookedDates.includes(date)) {
+    if (error) error.textContent = 'Il ristorante è al completo per questa data. Scegli un\'altra data.';
+    event.target.value = ''; // Clear the selected date
+    return;
+  }
+  
+  // Otherwise, proceed with normal availability check
   fetch(`api.php?action=check_date_availability&date=${date}`)
     .then(response => response.json())
     .then(data => {
@@ -215,8 +325,19 @@ function checkDateAvailability(event) {
       } else if (data.available === false) {
         if (error) error.textContent = 'Il ristorante è al completo per questa data. Scegli un\'altra data.';
         event.target.value = '';
+        
+        // Add to fully booked dates if not already there
+        if (!window.fullyBookedDates) window.fullyBookedDates = [];
+        if (!window.fullyBookedDates.includes(date)) {
+          window.fullyBookedDates.push(date);
+        }
       } else {
         if (error) error.textContent = '';
+        
+        // Remove from fully booked dates if it was there
+        if (window.fullyBookedDates && window.fullyBookedDates.includes(date)) {
+          window.fullyBookedDates = window.fullyBookedDates.filter(d => d !== date);
+        }
       }
     })
     .catch(err => console.error('Error checking date availability:', err));

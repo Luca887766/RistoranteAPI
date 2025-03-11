@@ -56,6 +56,9 @@ switch ($action) {
     case 'check_date_availability':
         checkDateAvailability($conn);
         break;
+    case 'check_date_range_availability':
+        checkDateRangeAvailability($conn);
+        break;
     case 'check_timeslot_availability':
         checkTimeSlotAvailability($conn);
         break;
@@ -414,6 +417,81 @@ function checkDateAvailability($conn) {
             'availableSlots' => $availableSlots
         ]);
     }
+}
+
+function checkDateRangeAvailability($conn) {
+    $startDate = isset($_GET['start']) ? $_GET['start'] : '';
+    $endDate = isset($_GET['end']) ? $_GET['end'] : '';
+    
+    if (empty($startDate) || empty($endDate)) {
+        echo json_encode(['error' => 'Date di inizio e fine non specificate']);
+        return;
+    }
+    
+    $today = date('Y-m-d');
+    if ($startDate < $today) {
+        $startDate = $today;
+    }
+    
+    // Get all dates in the range
+    $dateRange = [];
+    $current = new DateTime($startDate);
+    $end = new DateTime($endDate);
+    $end->modify('+1 day'); // Include the end date
+    
+    $interval = new DateInterval('P1D');
+    $dateRange = new DatePeriod($current, $interval, $end);
+    
+    // Get all time slots for the restaurant
+    $timeSlots = ['19:00', '19:30', '20:00', '20:30', '21:00', '21:30', '22:00'];
+    $maxCapacity = 50; // Restaurant capacity
+    
+    $fullyBookedDates = [];
+    $dateAvailability = [];
+    
+    // Check each date in the range
+    foreach ($dateRange as $date) {
+        $formattedDate = $date->format('Y-m-d');
+        $isFullyBooked = true;
+        
+        // Check each time slot for this date
+        foreach ($timeSlots as $timeSlot) {
+            // Get reservations that overlap with this time slot
+            $stmt = $conn->prepare("
+                SELECT SUM(persone) as total FROM reservations 
+                WHERE data = ? AND (
+                    (ora <= ? AND ADDTIME(ora, '01:30:00') > ?) OR
+                    (ora < ADDTIME(?, '01:30:00') AND ora >= ?)
+                )
+            ");
+            $endTime = date('H:i', strtotime($timeSlot) + 5400); // 1.5 hours = 5400 seconds
+            $stmt->bind_param("sssss", $formattedDate, $timeSlot, $endTime, $timeSlot, $timeSlot);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            $row = $result->fetch_assoc();
+            $occupancy = $row['total'] ? (int)$row['total'] : 0;
+            $stmt->close();
+            
+            // If at least one time slot has space, the date is not fully booked
+            if ($occupancy < $maxCapacity) {
+                $isFullyBooked = false;
+                break;
+            }
+        }
+        
+        if ($isFullyBooked) {
+            $fullyBookedDates[] = $formattedDate;
+            $dateAvailability[$formattedDate] = false;
+        } else {
+            $dateAvailability[$formattedDate] = true;
+        }
+    }
+    
+    echo json_encode([
+        'success' => true,
+        'fullyBookedDates' => $fullyBookedDates,
+        'dateAvailability' => $dateAvailability
+    ]);
 }
 
 function checkTimeSlotAvailability($conn) {
