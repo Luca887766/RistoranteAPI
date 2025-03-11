@@ -360,10 +360,6 @@ function fetchAdminReservations() {
       }
 
       const tableBody = document.querySelector('#reservations-table tbody');
-      
-      // Store current table state for comparison
-      const oldHTML = tableBody ? tableBody.innerHTML : '';
-      
       if (!tableBody) return;
       
       tableBody.innerHTML = '';
@@ -384,25 +380,22 @@ function fetchAdminReservations() {
         tableBody.appendChild(row);
       });
 
-      // Only update event handlers if the content actually changed
-      if (oldHTML !== tableBody.innerHTML) {
-        // Add event listeners to edit and delete buttons
-        document.querySelectorAll('.edit-btn').forEach(btn => {
-          btn.addEventListener('click', function() {
-            const id = this.getAttribute('data-id');
-            editReservation(id);
-          });
+      // Always attach event handlers - removed conditional comparison that was preventing handlers from being attached
+      document.querySelectorAll('#reservations-table .edit-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+          const id = this.getAttribute('data-id');
+          editReservation(id);
         });
+      });
 
-        document.querySelectorAll('.delete-btn').forEach(btn => {
-          btn.addEventListener('click', function() {
-            const id = this.getAttribute('data-id');
-            showConfirmation('Sei sicuro di voler eliminare questa prenotazione?', () => {
-              deleteReservation(id);
-            });
+      document.querySelectorAll('#reservations-table .delete-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+          const id = this.getAttribute('data-id');
+          showConfirmation('Sei sicuro di voler eliminare questa prenotazione?', () => {
+            deleteReservation(id);
           });
         });
-      }
+      });
     })
     .catch(error => console.error('Error fetching reservations:', error));
 }
@@ -419,9 +412,6 @@ function fetchClientReservations() {
 
       const container = document.getElementById('client-reservations-container');
       if (!container) return;
-      
-      // Store current container state for comparison
-      const oldHTML = container.innerHTML;
       
       container.innerHTML = '';
 
@@ -447,18 +437,15 @@ function fetchClientReservations() {
         container.appendChild(card);
       });
 
-      // Only update event handlers if the content actually changed
-      if (oldHTML !== container.innerHTML) {
-        // Add event listeners to delete buttons
-        document.querySelectorAll('#client-reservations-container .delete-btn').forEach(btn => {
-          btn.addEventListener('click', function() {
-            const id = this.getAttribute('data-id');
-            showConfirmation('Sei sicuro di voler cancellare questa prenotazione?', () => {
-              deleteReservation(id, true);
-            });
+      // Always attach event handlers - removed conditional comparison that was preventing handlers from being attached
+      document.querySelectorAll('#client-reservations-container .delete-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+          const id = this.getAttribute('data-id');
+          showConfirmation('Sei sicuro di voler cancellare questa prenotazione?', () => {
+            deleteReservation(id, true);
           });
         });
-      }
+      });
     })
     .catch(error => console.error('Error fetching user reservations:', error));
 }
