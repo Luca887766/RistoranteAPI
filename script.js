@@ -422,6 +422,9 @@ function setupReservationForm() {
 
 // Admin reservation management
 function fetchAdminReservations() {
+  // If we have a selected date in the hourly view, use that, otherwise use today
+  const dateToUse = window.currentHourlyViewDate || new Date();
+  
   fetch('api.php?action=get_reservations')
     .then(response => response.json())
     .then(data => {
@@ -432,45 +435,8 @@ function fetchAdminReservations() {
         return;
       }
       
-      // Categorize reservations by date
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      
-      const todayReservations = [];
-      const futureReservations = [];
-      const pastReservations = [];
-      
-      data.forEach(reservation => {
-        const reservationDate = new Date(reservation.data);
-        reservationDate.setHours(0, 0, 0, 0);
-        
-        if (reservationDate.getTime() === today.getTime()) {
-          todayReservations.push(reservation);
-        } else if (reservationDate > today) {
-          futureReservations.push(reservation);
-        } else {
-          pastReservations.push(reservation);
-        }
-      });
-      
-      // Sort reservations by date and time
-      const sortByDateAndTime = (a, b) => {
-        const dateA = new Date(a.data + ' ' + a.ora);
-        const dateB = new Date(b.data + ' ' + b.ora);
-        return dateA - dateB;
-      };
-      
-      todayReservations.sort((a, b) => {
-        return a.ora.localeCompare(b.ora);
-      });
-      
-      futureReservations.sort(sortByDateAndTime);
-      pastReservations.sort((a, b) => sortByDateAndTime(b, a)); // Reverse sort for past
-      
-      // Populate the tables
-      populateReservationTable('today-reservations-table', todayReservations);
-      populateReservationTable('future-reservations-table', futureReservations);
-      populateReservationTable('past-reservations-table', pastReservations);
+      // Instead of sorting the reservations here, call updateReservationTablesForDate
+      updateReservationTablesForDate(dateToUse);
       
       // Setup hourly view after fetching reservations
       setupHourlyView();
@@ -1707,26 +1673,23 @@ function setupHourlyView() {
   
   if (!prevDayBtn || !nextDayBtn) return;
   
-  // Remove existing event listeners
   const newPrevDayBtn = prevDayBtn.cloneNode(true);
   const newNextDayBtn = nextDayBtn.cloneNode(true);
   prevDayBtn.parentNode.replaceChild(newPrevDayBtn, prevDayBtn);
   nextDayBtn.parentNode.replaceChild(newNextDayBtn, nextDayBtn);
   
-  // Get current displayed date or use today
   window.currentHourlyViewDate = window.currentHourlyViewDate || new Date();
   
-  // Update display
   updateDateDisplay();
   loadHourlyData(window.currentHourlyViewDate);
   
-  // Add event listeners
   newPrevDayBtn.addEventListener('click', () => {
     const prevDate = new Date(window.currentHourlyViewDate);
     prevDate.setDate(prevDate.getDate() - 1);
     window.currentHourlyViewDate = prevDate;
     updateDateDisplay();
     loadHourlyData(prevDate);
+    updateReservationTablesForDate(prevDate);
   });
   
   newNextDayBtn.addEventListener('click', () => {
@@ -1735,7 +1698,70 @@ function setupHourlyView() {
     window.currentHourlyViewDate = nextDate;
     updateDateDisplay();
     loadHourlyData(nextDate);
+    updateReservationTablesForDate(nextDate);
   });
+}
+// Function to update reservation tables based on the selected date
+function updateReservationTablesForDate(selectedDate) {
+  fetch('api.php?action=get_reservations')
+    .then(response => response.json())
+    .then(data => {
+      if (data.error) {
+        showToast(data.error, 'error');
+        return;
+      }
+      
+      const selectedDateStr = selectedDate.toISOString().split('T')[0];
+      
+      const todayReservations = [];
+      const futureReservations = [];
+      const pastReservations = [];
+      
+      data.forEach(reservation => {
+        const reservationDate = new Date(reservation.data);
+        reservationDate.setHours(0, 0, 0, 0);
+        
+        if (reservation.data === selectedDateStr) {
+          todayReservations.push(reservation);
+        } else if (reservationDate > selectedDate) {
+          futureReservations.push(reservation);
+        } else {
+          pastReservations.push(reservation);
+        }
+      });
+      
+      const sortByDateAndTime = (a, b) => {
+        const dateA = new Date(a.data + ' ' + a.ora);
+        const dateB = new Date(b.data + ' ' + b.ora);
+        return dateA - dateB;
+      };
+      
+      todayReservations.sort((a, b) => a.ora.localeCompare(b.ora));
+      
+      futureReservations.sort(sortByDateAndTime);
+      pastReservations.sort((a, b) => sortByDateAndTime(b, a));
+      
+      const todayTitle = document.querySelector('.reservation-section:nth-child(1) h3');
+      if (todayTitle) {
+        const dateOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+        const formattedDate = selectedDate.toLocaleDateString('it-IT', dateOptions);
+        
+        const today = new Date();
+        const isToday = today.toDateString() === selectedDate.toDateString();
+        
+        todayTitle.textContent = isToday ? 
+          'Prenotazioni di Oggi' : 
+          `Prenotazioni del ${formattedDate.charAt(0).toUpperCase() + formattedDate.slice(1)}`;
+      }
+      
+      populateReservationTable('today-reservations-table', todayReservations);
+      populateReservationTable('future-reservations-table', futureReservations);
+      populateReservationTable('past-reservations-table', pastReservations);
+    })
+    .catch(error => {
+      console.error('Error fetching reservations for date:', error);
+      showToast('Errore durante il caricamento delle prenotazioni', 'error');
+    });
 }
 
 function updateDateDisplay() {
@@ -1751,11 +1777,9 @@ function updateDateDisplay() {
   
   const formattedDate = window.currentHourlyViewDate.toLocaleDateString('it-IT', options);
   
-  // Check if this is today's date
   const today = new Date();
   const isToday = today.toDateString() === window.currentHourlyViewDate.toDateString();
   
-  // Format with proper capitalization and add "Oggi" if it's today
   let displayText = formattedDate.charAt(0).toUpperCase() + formattedDate.slice(1);
   if (isToday) {
     displayText = `<span class="current-day-highlight">Oggi</span>, ${displayText}`;
@@ -1763,7 +1787,6 @@ function updateDateDisplay() {
   
   dateDisplay.innerHTML = displayText;
   
-  // Add classes to buttons for styling
   const prevDayBtn = document.getElementById('prev-day');
   const nextDayBtn = document.getElementById('next-day');
   
@@ -1806,11 +1829,9 @@ function displayHourlyData(data) {
   
   hourlyStatsContent.innerHTML = '';
   
-  // Create table
   const table = document.createElement('table');
   table.className = 'hourly-table';
   
-  // Create header
   const headerRow = document.createElement('tr');
   const timeHeader = document.createElement('th');
   timeHeader.textContent = 'Orario';
@@ -1826,7 +1847,6 @@ function displayHourlyData(data) {
   
   table.appendChild(headerRow);
   
-  // Add rows for each hour
   Object.entries(data.hourly_data).forEach(([hour, stats]) => {
     const row = document.createElement('tr');
     
@@ -1847,7 +1867,6 @@ function displayHourlyData(data) {
   
   hourlyStatsContent.appendChild(table);
   
-  // Update totals
   totalCovers.textContent = data.totals.covers;
   totalReservations.textContent = data.totals.reservations;
 }
