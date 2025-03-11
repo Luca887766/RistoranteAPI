@@ -431,67 +431,120 @@ function fetchAdminReservations() {
         }
         return;
       }
-
-      const tableBody = document.querySelector('#reservations-table tbody');
-      if (!tableBody) return;
       
-      while (tableBody.firstChild) {
-        tableBody.removeChild(tableBody.firstChild);
-      }
-
+      // Categorize reservations by date
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      
+      const todayReservations = [];
+      const futureReservations = [];
+      const pastReservations = [];
+      
       data.forEach(reservation => {
-        const row = document.createElement('tr');
+        const reservationDate = new Date(reservation.data);
+        reservationDate.setHours(0, 0, 0, 0);
         
-        const nameCell = document.createElement('td');
-        nameCell.textContent = reservation.nome_cliente;
-        row.appendChild(nameCell);
-        
-        const dateCell = document.createElement('td');
-        dateCell.textContent = reservation.data;
-        row.appendChild(dateCell);
-        
-        const timeCell = document.createElement('td');
-        timeCell.textContent = reservation.ora;
-        row.appendChild(timeCell);
-        
-        const peopleCell = document.createElement('td');
-        peopleCell.textContent = reservation.persone;
-        row.appendChild(peopleCell);
-        
-        const contactCell = document.createElement('td');
-        contactCell.textContent = reservation.contatto;
-        row.appendChild(contactCell);
-        
-        const actionsCell = document.createElement('td');
-        
-        const editBtn = document.createElement('button');
-        editBtn.textContent = 'Modifica';
-        editBtn.className = 'edit-btn';
-        editBtn.dataset.id = reservation.id;
-        editBtn.addEventListener('click', function() {
-          editReservation(this.dataset.id);
-        });
-        actionsCell.appendChild(editBtn);
-        
-        const deleteBtn = document.createElement('button');
-        deleteBtn.textContent = 'Elimina';
-        deleteBtn.className = 'delete-btn';
-        deleteBtn.dataset.id = reservation.id;
-        deleteBtn.addEventListener('click', function() {
-          showConfirmation('Sei sicuro di voler eliminare questa prenotazione?', () => {
-            deleteReservation(this.dataset.id);
-          });
-        });
-        actionsCell.appendChild(deleteBtn);
-        
-        row.appendChild(actionsCell);
-        tableBody.appendChild(row);
+        if (reservationDate.getTime() === today.getTime()) {
+          todayReservations.push(reservation);
+        } else if (reservationDate > today) {
+          futureReservations.push(reservation);
+        } else {
+          pastReservations.push(reservation);
+        }
       });
+      
+      // Sort reservations by date and time
+      const sortByDateAndTime = (a, b) => {
+        const dateA = new Date(a.data + ' ' + a.ora);
+        const dateB = new Date(b.data + ' ' + b.ora);
+        return dateA - dateB;
+      };
+      
+      todayReservations.sort((a, b) => {
+        return a.ora.localeCompare(b.ora);
+      });
+      
+      futureReservations.sort(sortByDateAndTime);
+      pastReservations.sort((a, b) => sortByDateAndTime(b, a)); // Reverse sort for past
+      
+      // Populate the tables
+      populateReservationTable('today-reservations-table', todayReservations);
+      populateReservationTable('future-reservations-table', futureReservations);
+      populateReservationTable('past-reservations-table', pastReservations);
       
       // Setup hourly view after fetching reservations
       setupHourlyView();
     })
     .catch(error => console.error('Error fetching reservations:', error));
+}
+
+function populateReservationTable(tableId, reservations) {
+  const tableBody = document.querySelector(`#${tableId} tbody`);
+  if (!tableBody) return;
+  
+  while (tableBody.firstChild) {
+    tableBody.removeChild(tableBody.firstChild);
+  }
+  
+  if (reservations.length === 0) {
+    const row = document.createElement('tr');
+    const cell = document.createElement('td');
+    cell.colSpan = 6;
+    cell.textContent = 'Nessuna prenotazione trovata';
+    cell.className = 'no-reservations';
+    row.appendChild(cell);
+    tableBody.appendChild(row);
+    return;
+  }
+
+  reservations.forEach(reservation => {
+    const row = document.createElement('tr');
+    
+    const nameCell = document.createElement('td');
+    nameCell.textContent = reservation.nome_cliente;
+    row.appendChild(nameCell);
+    
+    const dateCell = document.createElement('td');
+    dateCell.textContent = reservation.data;
+    row.appendChild(dateCell);
+    
+    const timeCell = document.createElement('td');
+    timeCell.textContent = reservation.ora;
+    row.appendChild(timeCell);
+    
+    const peopleCell = document.createElement('td');
+    peopleCell.textContent = reservation.persone;
+    row.appendChild(peopleCell);
+    
+    const contactCell = document.createElement('td');
+    contactCell.textContent = reservation.contatto;
+    row.appendChild(contactCell);
+    
+    const actionsCell = document.createElement('td');
+    
+    const editBtn = document.createElement('button');
+    editBtn.textContent = 'Modifica';
+    editBtn.className = 'edit-btn';
+    editBtn.dataset.id = reservation.id;
+    editBtn.addEventListener('click', function() {
+      editReservation(this.dataset.id);
+    });
+    actionsCell.appendChild(editBtn);
+    
+    const deleteBtn = document.createElement('button');
+    deleteBtn.textContent = 'Elimina';
+    deleteBtn.className = 'delete-btn';
+    deleteBtn.dataset.id = reservation.id;
+    deleteBtn.addEventListener('click', function() {
+      showConfirmation('Sei sicuro di voler eliminare questa prenotazione?', () => {
+        deleteReservation(this.dataset.id);
+      });
+    });
+    actionsCell.appendChild(deleteBtn);
+    
+    row.appendChild(actionsCell);
+    tableBody.appendChild(row);
+  });
 }
 
 // Client reservation display
@@ -1689,8 +1742,40 @@ function updateDateDisplay() {
   const dateDisplay = document.getElementById('current-date-display');
   if (!dateDisplay) return;
   
-  const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-  dateDisplay.textContent = window.currentHourlyViewDate.toLocaleDateString('it-IT', options);
+  const options = { 
+    weekday: 'long', 
+    year: 'numeric', 
+    month: 'long', 
+    day: 'numeric' 
+  };
+  
+  const formattedDate = window.currentHourlyViewDate.toLocaleDateString('it-IT', options);
+  
+  // Check if this is today's date
+  const today = new Date();
+  const isToday = today.toDateString() === window.currentHourlyViewDate.toDateString();
+  
+  // Format with proper capitalization and add "Oggi" if it's today
+  let displayText = formattedDate.charAt(0).toUpperCase() + formattedDate.slice(1);
+  if (isToday) {
+    displayText = `<span class="current-day-highlight">Oggi</span>, ${displayText}`;
+  }
+  
+  dateDisplay.innerHTML = displayText;
+  
+  // Add classes to buttons for styling
+  const prevDayBtn = document.getElementById('prev-day');
+  const nextDayBtn = document.getElementById('next-day');
+  
+  if (prevDayBtn && !prevDayBtn.classList.contains('prev-btn')) {
+    prevDayBtn.classList.add('prev-btn');
+    prevDayBtn.innerHTML = 'Giorno Precedente';
+  }
+  
+  if (nextDayBtn && !nextDayBtn.classList.contains('next-btn')) {
+    nextDayBtn.classList.add('next-btn');
+    nextDayBtn.innerHTML = 'Giorno Successivo';
+  }
 }
 
 function loadHourlyData(date) {

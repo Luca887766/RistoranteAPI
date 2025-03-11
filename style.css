@@ -1591,28 +1591,74 @@ footer iframe.map {
   align-items: center;
   justify-content: space-between;
   margin-bottom: 1.5rem;
+  background-color: #fff0f7;
+  border-radius: 0.5rem;
+  padding: 1rem 1.5rem;
+  box-shadow: 0 0.125rem 0.25rem rgba(39, 5, 20, 0.1);
+  border: 1px solid #ffdeec;
 }
 
 #current-date-display {
   margin: 0;
-  font-size: 1.4rem;
+  font-size: 1.6rem;
   color: #270514;
   text-transform: capitalize;
+  font-weight: 600;
+  font-family: 'title', serif;
+  position: relative;
+  text-align: center;
+  flex-grow: 1;
+}
+
+#current-date-display::before,
+#current-date-display::after {
+  content: '★';
+  color: #911249;
+  font-size: 1.2rem;
+  margin: 0 0.75rem;
+  opacity: 0.6;
 }
 
 .day-nav-btn {
-  padding: 0.6rem 1rem;
+  padding: 0.7rem 1.2rem;
   background-color: #270514;
   color: white;
   border: none;
-  border-radius: 0.25rem;
+  border-radius: 2rem;
   cursor: pointer;
-  font-size: 0.9rem;
-  transition: background-color 0.3s ease;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  box-shadow: 0 0.2rem 0.4rem rgba(0, 0, 0, 0.2);
 }
 
 .day-nav-btn:hover {
   background-color: #4b0925;
+  transform: translateY(-2px);
+  box-shadow: 0 0.3rem 0.5rem rgba(0, 0, 0, 0.3);
+}
+
+.day-nav-btn:active {
+  transform: translateY(1px);
+  box-shadow: 0 0.1rem 0.2rem rgba(0, 0, 0, 0.2);
+}
+
+.day-nav-btn.prev-btn::before {
+  content: '«';
+  margin-right: 0.5rem;
+  font-size: 1.2rem;
+}
+
+.day-nav-btn.next-btn::after {
+  content: '»';
+  margin-left: 0.5rem;
+  font-size: 1.2rem;
+}
+
+.current-day-highlight {
+  font-weight: 700;
+  color: #911249;
 }
 
 .hourly-stats {
@@ -1656,4 +1702,58 @@ footer iframe.map {
   font-size: 1.1rem;
   margin-top: 1rem;
   color: #270514;
+}
+
+/* Reservation sections styling */
+.reservation-section {
+  margin-bottom: 2rem;
+}
+
+.reservation-section h3 {
+  color: #270514;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid #ffdeec;
+}
+
+.table-divider {
+  height: 2px;
+  background: linear-gradient(to right, transparent, #270514, transparent);
+  margin: 3rem 1rem;
+  opacity: 0.7;
+}
+
+.reservations-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+  background-color: white;
+}
+
+.reservations-table th, 
+.reservations-table td {
+  padding: 0.75rem 1rem;
+  text-align: left;
+  border-bottom: 1px solid #eee;
+}
+
+.reservations-table th {
+  background-color: #270514;
+  color: white;
+  font-weight: 500;
+}
+
+.reservations-table tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+.reservations-table tr:hover {
+  background-color: #f1f1f1;
+}
+
+.no-reservations {
+  text-align: center;
+  padding: 1rem;
+  color: #888;
+  font-style: italic;
 }

@@ -30,9 +30,9 @@
         <h2>Gestione Prenotazioni</h2>
         <div id="hourly-view-container">
           <div class="hourly-view-header">
-            <button id="prev-day" class="day-nav-btn">&laquo; Giorno Precedente</button>
+            <button id="prev-day" class="day-nav-btn prev-btn">Giorno Precedente</button>
             <h3 id="current-date-display">Oggi</h3>
-            <button id="next-day" class="day-nav-btn">Giorno Successivo &raquo;</button>
+            <button id="next-day" class="day-nav-btn next-btn">Giorno Successivo</button>
           </div>
           <div class="hourly-stats">
             <div id="hourly-stats-content"></div>
@@ -44,24 +44,69 @@
         </div>
         
         <div id="admin-reservations">
-          <table id="reservations-table">
-            <thead>
-              <tr>
-                <th>Nome</th>
-                <th>Data</th>
-                <th>Ora</th>
-                <th>Persone</th>
-                <th>Contatto</th>
-                <th>Azioni</th>
-              </tr>
-            </thead>
-            <tbody></tbody>
-          </table>
+          <!-- Today's Reservations -->
+          <div class="reservation-section">
+            <h3>Prenotazioni di Oggi</h3>
+            <table id="today-reservations-table" class="reservations-table">
+              <thead>
+                <tr>
+                  <th>Nome</th>
+                  <th>Data</th>
+                  <th>Ora</th>
+                  <th>Persone</th>
+                  <th>Contatto</th>
+                  <th>Azioni</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+          
+          <div class="table-divider"></div>
+          
+          <!-- Future Reservations -->
+          <div class="reservation-section">
+            <h3>Prenotazioni Future</h3>
+            <table id="future-reservations-table" class="reservations-table">
+              <thead>
+                <tr>
+                  <th>Nome</th>
+                  <th>Data</th>
+                  <th>Ora</th>
+                  <th>Persone</th>
+                  <th>Contatto</th>
+                  <th>Azioni</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+          
+          <div class="table-divider"></div>
+          
+          <!-- Past Reservations -->
+          <div class="reservation-section">
+            <h3>Prenotazioni Passate</h3>
+            <table id="past-reservations-table" class="reservations-table">
+              <thead>
+                <tr>
+                  <th>Nome</th>
+                  <th>Data</th>
+                  <th>Ora</th>
+                  <th>Persone</th>
+                  <th>Contatto</th>
+                  <th>Azioni</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
         </div>
+        
         <button id="admin-logout" class="logout-btn">Logout</button>
       </div>
 
-      <div id="client-area" style="display: none;">
+      <div id="client-area" style="display: none;"></div>
         <h2>Prenota un Tavolo</h2>
         <div id="reservation-form-container">
           <form id="reservation-form">
