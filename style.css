@@ -1349,6 +1349,14 @@ footer iframe.map {
   font-size: 1.4rem;
 }
 
+.reservation-category-header {
+  color: #270514;
+  font-size: 1.2rem;
+  margin-bottom: 1rem;
+  padding-bottom: 0.25rem;
+  border-bottom: 1px solid #ffdeec;
+}
+
 .reservation-card {
   background-color: white;
   border: 1px solid #eee;

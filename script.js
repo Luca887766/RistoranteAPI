@@ -537,51 +537,101 @@ function fetchClientReservations() {
         return;
       }
 
-      data.forEach(reservation => {
-        const card = document.createElement('div');
-        card.classList.add('reservation-card');
-        
-        const detailsDiv = document.createElement('div');
-        detailsDiv.classList.add('reservation-details');
-        
-        const heading = document.createElement('h4');
-        heading.textContent = `Prenotazione per ${reservation.persone} persone`;
-        detailsDiv.appendChild(heading);
-        
-        const dateTimePara = document.createElement('p');
-        dateTimePara.textContent = `Data: ${reservation.data} alle ${reservation.ora}`;
-        detailsDiv.appendChild(dateTimePara);
-        
-        const namePara = document.createElement('p');
-        namePara.textContent = `Nome: ${reservation.nome_cliente}`;
-        detailsDiv.appendChild(namePara);
-        
-        const contactPara = document.createElement('p');
-        contactPara.textContent = `Contatto: ${reservation.contatto}`;
-        detailsDiv.appendChild(contactPara);
-        
-        card.appendChild(detailsDiv);
-        
-        const actionsDiv = document.createElement('div');
-        actionsDiv.classList.add('reservation-actions');
-        
-        const deleteBtn = document.createElement('button');
-        deleteBtn.textContent = 'Cancella';
-        deleteBtn.classList.add('delete-btn');
-        deleteBtn.dataset.id = reservation.id;
-        deleteBtn.addEventListener('click', function() {
-          showConfirmation('Sei sicuro di voler cancellare questa prenotazione?', () => {
-            deleteReservation(this.dataset.id, true);
-          });
-        });
-        
-        actionsDiv.appendChild(deleteBtn);
-        card.appendChild(actionsDiv);
-        
-        container.appendChild(card);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      
+      const currentAndFutureReservations = data.filter(reservation => {
+        const reservationDate = new Date(reservation.data);
+        reservationDate.setHours(0, 0, 0, 0);
+        return reservationDate >= today;
       });
+      
+      currentAndFutureReservations.sort((a, b) => {
+        const dateA = new Date(a.data + ' ' + a.ora);
+        const dateB = new Date(b.data + ' ' + b.ora);
+        return dateA - dateB;
+      });
+      
+      if (currentAndFutureReservations.length === 0) {
+        const noReservationsMsg = document.createElement('p');
+        noReservationsMsg.textContent = 'Non hai prenotazioni attive o future.';
+        container.appendChild(noReservationsMsg);
+        return;
+      }
+
+      const todayDateString = today.toISOString().split('T')[0];
+      const todayReservations = currentAndFutureReservations.filter(r => r.data === todayDateString);
+      
+      if (todayReservations.length > 0) {
+        const todayHeader = document.createElement('h4');
+        todayHeader.textContent = 'Prenotazioni di Oggi';
+        todayHeader.className = 'reservation-category-header';
+        container.appendChild(todayHeader);
+        
+        todayReservations.forEach(reservation => createReservationCard(reservation, container));
+      }
+      
+      const futureReservations = currentAndFutureReservations.filter(r => r.data > todayDateString);
+      
+      if (futureReservations.length > 0) {
+        const futureHeader = document.createElement('h4');
+        futureHeader.textContent = 'Prenotazioni Future';
+        futureHeader.className = 'reservation-category-header';
+        if (todayReservations.length > 0) futureHeader.style.marginTop = '2rem';
+        container.appendChild(futureHeader);
+        
+        futureReservations.forEach(reservation => createReservationCard(reservation, container));
+      }
     })
     .catch(error => console.error('Error fetching user reservations:', error));
+}
+
+function createReservationCard(reservation, container) {
+  const card = document.createElement('div');
+  card.classList.add('reservation-card');
+  
+  const detailsDiv = document.createElement('div');
+  detailsDiv.classList.add('reservation-details');
+  
+  const heading = document.createElement('h4');
+  heading.textContent = `Prenotazione per ${reservation.persone} persone`;
+  detailsDiv.appendChild(heading);
+  
+  const reservationDate = new Date(reservation.data);
+  const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+  const formattedDate = reservationDate.toLocaleDateString('it-IT', options);
+  
+  const dateTimePara = document.createElement('p');
+  dateTimePara.textContent = `Data: ${formattedDate} alle ${reservation.ora}`;
+  detailsDiv.appendChild(dateTimePara);
+  
+  const namePara = document.createElement('p');
+  namePara.textContent = `Nome: ${reservation.nome_cliente}`;
+  detailsDiv.appendChild(namePara);
+  
+  const contactPara = document.createElement('p');
+  contactPara.textContent = `Contatto: ${reservation.contatto}`;
+  detailsDiv.appendChild(contactPara);
+  
+  card.appendChild(detailsDiv);
+  
+  const actionsDiv = document.createElement('div');
+  actionsDiv.classList.add('reservation-actions');
+  
+  const deleteBtn = document.createElement('button');
+  deleteBtn.textContent = 'Cancella';
+  deleteBtn.classList.add('delete-btn');
+  deleteBtn.dataset.id = reservation.id;
+  deleteBtn.addEventListener('click', function() {
+    showConfirmation('Sei sicuro di voler cancellare questa prenotazione?', () => {
+      deleteReservation(this.dataset.id, true);
+    });
+  });
+  
+  actionsDiv.appendChild(deleteBtn);
+  card.appendChild(actionsDiv);
+  
+  container.appendChild(card);
 }
 
 // Edit reservation modal
