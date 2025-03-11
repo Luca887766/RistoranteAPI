@@ -1667,15 +1667,19 @@ footer iframe.map {
   padding: 1rem;
 }
 
+/* Enhanced hourly table styles */
 .hourly-table {
   width: 100%;
   border-collapse: collapse;
   margin-bottom: 1rem;
+  border: 1px solid #eee;
+  border-radius: 4px;
+  overflow: hidden;
 }
 
 .hourly-table th,
 .hourly-table td {
-  padding: 0.75rem;
+  padding: 0.75rem 1rem;
   text-align: center;
   border-bottom: 1px solid #eee;
 }
@@ -1684,14 +1688,44 @@ footer iframe.map {
   background-color: #270514;
   color: white;
   font-weight: 500;
+  text-transform: uppercase;
+  font-size: 0.9rem;
+  letter-spacing: 0.5px;
+}
+
+.hourly-table tr:last-child td {
+  border-bottom: none;
 }
 
 .hourly-table tr:nth-child(even) {
-  background-color: rgba(255, 255, 255, 0.6);
+  background-color: rgba(255, 240, 247, 0.3);
 }
 
 .hourly-table tr:hover {
-  background-color: rgba(255, 255, 255, 0.9);
+  background-color: rgba(255, 222, 236, 0.5);
+}
+
+.occupancy-indicator {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  margin-left: 8px;
+  vertical-align: middle;
+}
+
+.capacity-meter {
+  height: 20px;
+  background-color: #f1f1f1;
+  border-radius: 4px;
+  overflow: hidden;
+  position: relative;
+  width: 100%;
+}
+
+.hourly-table tr:last-child {
+  border-top: 2px solid #270514;
+  background-color: #fff0f7;
 }
 
 .hourly-totals {
@@ -1702,6 +1736,10 @@ footer iframe.map {
   font-size: 1.1rem;
   margin-top: 1rem;
   color: #270514;
+  background-color: #fff0f7;
+  padding: 0.75rem 1rem;
+  border-radius: 4px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
 /* Reservation sections styling */

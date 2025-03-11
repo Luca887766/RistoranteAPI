@@ -1833,6 +1833,7 @@ function displayHourlyData(data) {
   table.className = 'hourly-table';
   
   const headerRow = document.createElement('tr');
+  
   const timeHeader = document.createElement('th');
   timeHeader.textContent = 'Orario';
   headerRow.appendChild(timeHeader);
@@ -1842,10 +1843,16 @@ function displayHourlyData(data) {
   headerRow.appendChild(reservationsHeader);
   
   const coversHeader = document.createElement('th');
-  coversHeader.textContent = 'Coperti';
+  coversHeader.textContent = 'Coperti Occupati';
   headerRow.appendChild(coversHeader);
   
+  const capacityHeader = document.createElement('th');
+  capacityHeader.textContent = 'Capienza (%)';
+  headerRow.appendChild(capacityHeader);
+  
   table.appendChild(headerRow);
+  
+  const maxCapacity = 50;
   
   Object.entries(data.hourly_data).forEach(([hour, stats]) => {
     const row = document.createElement('tr');
@@ -1860,10 +1867,97 @@ function displayHourlyData(data) {
     
     const coversCell = document.createElement('td');
     coversCell.textContent = stats.covers;
+    
+    if (stats.covers > 0) {
+      const occupancyLevel = stats.covers / maxCapacity;
+      coversCell.style.position = 'relative';
+      coversCell.style.paddingRight = '10px';
+      
+      const indicator = document.createElement('span');
+      indicator.className = 'occupancy-indicator';
+      indicator.style.position = 'absolute';
+      indicator.style.right = '10px';
+      indicator.style.top = '50%';
+      indicator.style.transform = 'translateY(-50%)';
+      indicator.style.width = '12px';
+      indicator.style.height = '12px';
+      indicator.style.borderRadius = '50%';
+      
+      if (occupancyLevel > 0.8) {
+        indicator.style.backgroundColor = '#f44336';
+      } else if (occupancyLevel > 0.5) {
+        indicator.style.backgroundColor = '#ff9800';
+      } else {
+        indicator.style.backgroundColor = '#4caf50';
+      }
+      
+      coversCell.appendChild(indicator);
+    }
+    
     row.appendChild(coversCell);
+    
+    const capacityCell = document.createElement('td');
+    const capacityPercentage = Math.round((stats.covers / maxCapacity) * 100);
+    
+    const capacityMeter = document.createElement('div');
+    capacityMeter.className = 'capacity-meter';
+    capacityMeter.style.width = '100%';
+    capacityMeter.style.height = '20px';
+    capacityMeter.style.backgroundColor = '#f1f1f1';
+    capacityMeter.style.borderRadius = '4px';
+    capacityMeter.style.overflow = 'hidden';
+    
+    const capacityFill = document.createElement('div');
+    capacityFill.style.height = '100%';
+    capacityFill.style.width = `${capacityPercentage}%`;
+    capacityFill.style.transition = 'width 0.5s ease';
+    
+    if (capacityPercentage > 80) {
+      capacityFill.style.backgroundColor = '#f44336';
+    } else if (capacityPercentage > 50) {
+      capacityFill.style.backgroundColor = '#ff9800';
+    } else {
+      capacityFill.style.backgroundColor = '#4caf50';
+    }
+    
+    const percentText = document.createElement('span');
+    percentText.textContent = `${capacityPercentage}%`;
+    percentText.style.position = 'absolute';
+    percentText.style.left = '50%';
+    percentText.style.top = '50%';
+    percentText.style.transform = 'translate(-50%, -50%)';
+    percentText.style.color = '#333';
+    percentText.style.fontWeight = 'bold';
+    percentText.style.fontSize = '0.8rem';
+    
+    capacityMeter.style.position = 'relative';
+    capacityMeter.appendChild(capacityFill);
+    capacityMeter.appendChild(percentText);
+    
+    capacityCell.appendChild(capacityMeter);
+    row.appendChild(capacityCell);
     
     table.appendChild(row);
   });
+  
+  const summaryRow = document.createElement('tr');
+  summaryRow.style.fontWeight = 'bold';
+  summaryRow.style.backgroundColor = '#fff0f7';
+  
+  const summaryLabelCell = document.createElement('td');
+  summaryLabelCell.textContent = 'Totali del Giorno';
+  summaryLabelCell.colSpan = 2;
+  summaryRow.appendChild(summaryLabelCell);
+  
+  const totalCoversCell = document.createElement('td');
+  totalCoversCell.textContent = data.totals.covers;
+  summaryRow.appendChild(totalCoversCell);
+  
+  const totalPercentCell = document.createElement('td');
+  totalPercentCell.textContent = 'Coperti Totali';
+  summaryRow.appendChild(totalPercentCell);
+  
+  table.appendChild(summaryRow);
   
   hourlyStatsContent.appendChild(table);
   

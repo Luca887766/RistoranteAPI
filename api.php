@@ -181,7 +181,6 @@ function createReservation($conn) {
         return;
     }
     
-    // Check if there's enough space during this time slot
     $bookingStart = $ora;
     $bookingEnd = date('H:i', strtotime($ora) + 5400);
     
@@ -376,15 +375,11 @@ function checkDateAvailability($conn) {
         return;
     }
     
-    // Get all time slots for the restaurant (from 19:00 to 22:00)
     $timeSlots = ['19:00', '19:30', '20:00', '20:30', '21:00', '21:30', '22:00'];
-    $maxCapacity = 50; // Restaurant capacity
-    
-    // Check each time slot separately to find if any is fully available
+    $maxCapacity = 50;
     $availableSlots = [];
     
     foreach ($timeSlots as $timeSlot) {
-        // Get reservations that overlap with this time slot
         $stmt = $conn->prepare("
             SELECT SUM(persone) as total FROM reservations 
             WHERE data = ? AND (
@@ -392,7 +387,7 @@ function checkDateAvailability($conn) {
                 (ora < ADDTIME(?, '01:30:00') AND ora >= ?)
             )
         ");
-        $endTime = date('H:i', strtotime($timeSlot) + 5400); // 1.5 hours = 5400 seconds
+        $endTime = date('H:i', strtotime($timeSlot) + 5400);
         $stmt->bind_param("sssss", $date, $timeSlot, $endTime, $timeSlot, $timeSlot);
         $stmt->execute();
         $result = $stmt->get_result();
@@ -403,7 +398,6 @@ function checkDateAvailability($conn) {
         $availableSlots[$timeSlot] = $maxCapacity - $occupancy;
     }
     
-    // If all time slots are fully booked, return not available
     $allFull = true;
     foreach ($availableSlots as $available) {
         if ($available > 0) {
@@ -506,7 +500,6 @@ function checkTimeSlotAvailability($conn) {
         return;
     }
     
-    // Get all reservations that would overlap with the requested time slot
     $bookingStart = $time;
     $bookingEnd = date('H:i', strtotime($time) + 5400);
     
@@ -528,7 +521,7 @@ function checkTimeSlotAvailability($conn) {
     $currentOccupancy = $row['total'] ? (int)$row['total'] : 0;
     $stmt->close();
     
-    $maxCapacity = 50; // Restaurant capacity
+    $maxCapacity = 50;
     
     if ($currentOccupancy + $persone > $maxCapacity) {
         echo json_encode([
@@ -554,17 +547,14 @@ function getHourlyReservations($conn) {
 
     $date = isset($_GET['date']) ? $_GET['date'] : date('Y-m-d');
     
-    // Validate date format
     if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) {
         echo json_encode(['error' => 'Invalid date format']);
         return;
     }
     
-    // Define restaurant hours
     $hours = ['19:00', '19:30', '20:00', '20:30', '21:00', '21:30', '22:00'];
     $result = [];
     
-    // Initialize all time slots with zero
     foreach ($hours as $hour) {
         $result[$hour] = [
             'reservations' => 0,
@@ -572,30 +562,30 @@ function getHourlyReservations($conn) {
         ];
     }
     
-    // Get all reservations for the specified date
-    $stmt = $conn->prepare("SELECT ora, COUNT(*) as num_reservations, SUM(persone) as total_covers 
-                           FROM reservations 
-                           WHERE data = ? 
-                           GROUP BY ora");
+    $stmt = $conn->prepare("SELECT id, ora, persone FROM reservations WHERE data = ?");
     $stmt->bind_param("s", $date);
     $stmt->execute();
-    $query_result = $stmt->get_result();
+    $reservations = $stmt->get_result();
     
-    // Fill in the actual reservation data
-    while ($row = $query_result->fetch_assoc()) {
-        $hour = $row['ora'];
-        if (isset($result[$hour])) {
-            $result[$hour]['reservations'] = (int)$row['num_reservations'];
-            $result[$hour]['covers'] = (int)$row['total_covers'];
-        }
-    }
-    
-    // Calculate totals
     $total_reservations = 0;
     $total_covers = 0;
-    foreach ($result as $data) {
-        $total_reservations += $data['reservations'];
-        $total_covers += $data['covers'];
+    
+    while ($reservation = $reservations->fetch_assoc()) {
+        $total_reservations++;
+        $total_covers += $reservation['persone'];
+        
+        $start_time = strtotime($reservation['ora']);
+        $end_time = strtotime('+90 minutes', $start_time);
+        
+        foreach ($hours as $hour) {
+            $slot_time = strtotime($hour);
+            $slot_end_time = strtotime('+30 minutes', $slot_time);
+            
+            if (($start_time < $slot_end_time) && ($end_time > $slot_time)) {
+                $result[$hour]['reservations']++;
+                $result[$hour]['covers'] += $reservation['persone'];
+            }
+        }
     }
     
     echo json_encode([
