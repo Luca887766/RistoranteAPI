@@ -62,6 +62,9 @@ switch ($action) {
     case 'check_timeslot_availability':
         checkTimeSlotAvailability($conn);
         break;
+    case 'get_hourly_reservations':
+        getHourlyReservations($conn);
+        break;
     default:
         echo json_encode(['error' => 'Invalid action']);
 }
@@ -541,6 +544,70 @@ function checkTimeSlotAvailability($conn) {
             'currentOccupancy' => $currentOccupancy
         ]);
     }
+}
+
+function getHourlyReservations($conn) {
+    if (!isset($_SESSION['user_id']) || $_SESSION['username'] !== 'admin') {
+        echo json_encode(['error' => 'Unauthorized']);
+        return;
+    }
+
+    $date = isset($_GET['date']) ? $_GET['date'] : date('Y-m-d');
+    
+    // Validate date format
+    if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) {
+        echo json_encode(['error' => 'Invalid date format']);
+        return;
+    }
+    
+    // Define restaurant hours
+    $hours = ['19:00', '19:30', '20:00', '20:30', '21:00', '21:30', '22:00'];
+    $result = [];
+    
+    // Initialize all time slots with zero
+    foreach ($hours as $hour) {
+        $result[$hour] = [
+            'reservations' => 0,
+            'covers' => 0
+        ];
+    }
+    
+    // Get all reservations for the specified date
+    $stmt = $conn->prepare("SELECT ora, COUNT(*) as num_reservations, SUM(persone) as total_covers 
+                           FROM reservations 
+                           WHERE data = ? 
+                           GROUP BY ora");
+    $stmt->bind_param("s", $date);
+    $stmt->execute();
+    $query_result = $stmt->get_result();
+    
+    // Fill in the actual reservation data
+    while ($row = $query_result->fetch_assoc()) {
+        $hour = $row['ora'];
+        if (isset($result[$hour])) {
+            $result[$hour]['reservations'] = (int)$row['num_reservations'];
+            $result[$hour]['covers'] = (int)$row['total_covers'];
+        }
+    }
+    
+    // Calculate totals
+    $total_reservations = 0;
+    $total_covers = 0;
+    foreach ($result as $data) {
+        $total_reservations += $data['reservations'];
+        $total_covers += $data['covers'];
+    }
+    
+    echo json_encode([
+        'date' => $date,
+        'hourly_data' => $result,
+        'totals' => [
+            'reservations' => $total_reservations,
+            'covers' => $total_covers
+        ]
+    ]);
+    
+    $stmt->close();
 }
 
 $conn->close();

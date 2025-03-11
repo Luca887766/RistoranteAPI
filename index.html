@@ -26,9 +26,23 @@
       <div id="pasticcere"></div>
     </div>
     <div id="prenotazioni" class="sezione-contenuto">
-      <!-- Admin Dashboard -->
       <div id="admin-dashboard" style="display: none;">
         <h2>Gestione Prenotazioni</h2>
+        <div id="hourly-view-container">
+          <div class="hourly-view-header">
+            <button id="prev-day" class="day-nav-btn">&laquo; Giorno Precedente</button>
+            <h3 id="current-date-display">Oggi</h3>
+            <button id="next-day" class="day-nav-btn">Giorno Successivo &raquo;</button>
+          </div>
+          <div class="hourly-stats">
+            <div id="hourly-stats-content"></div>
+            <div class="hourly-totals">
+              <div>Totale coperti: <span id="total-covers">0</span></div>
+              <div>Totale prenotazioni: <span id="total-reservations">0</span></div>
+            </div>
+          </div>
+        </div>
+        
         <div id="admin-reservations">
           <table id="reservations-table">
             <thead>
@@ -47,7 +61,6 @@
         <button id="admin-logout" class="logout-btn">Logout</button>
       </div>
 
-      <!-- Client Reservation Area -->
       <div id="client-area" style="display: none;">
         <h2>Prenota un Tavolo</h2>
         <div id="reservation-form-container">
