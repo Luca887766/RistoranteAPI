@@ -7,6 +7,9 @@ function caricaJSON(file) {
 
 // NAVIGATION FUNCTIONS
 function mostraSezione(idSezione) {
+  // Clear polling intervals when changing sections
+  clearPollingIntervals();
+
   const sezioni = document.querySelectorAll('.sezione-contenuto');
   sezioni.forEach(sezione => {
     sezione.classList.remove('fade-in');
@@ -44,11 +47,18 @@ function mostraSezione(idSezione) {
   }, 300);
 }
 
+// Polling intervals for automatic updates
+let adminPollingInterval = null;
+let clientPollingInterval = null;
+
 // RESERVATION SYSTEM FUNCTIONS
 function updateReservationSection() {
   const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
   const username = localStorage.getItem('username');
   const isAdmin = username === 'admin';
+
+  // Clear any existing polling intervals
+  clearPollingIntervals();
 
   const loginContainer = document.getElementById('login-register-container');
   const clientArea = document.getElementById('client-area');
@@ -102,8 +112,12 @@ function updateReservationSection() {
   if (isLoggedIn) {
     if (isAdmin) {
       fetchAdminReservations();
+      // Start polling for admin reservations
+      adminPollingInterval = setInterval(fetchAdminReservations, 2000);
     } else {
       fetchClientReservations();
+      // Start polling for client reservations
+      clientPollingInterval = setInterval(fetchClientReservations, 2000);
     }
   }
   
@@ -118,6 +132,19 @@ function updateReservationSection() {
       // Clear the stored event data to prevent it from being reused
       sessionStorage.removeItem('eventToBook');
     }
+  }
+}
+
+// Clear polling intervals
+function clearPollingIntervals() {
+  if (adminPollingInterval) {
+    clearInterval(adminPollingInterval);
+    adminPollingInterval = null;
+  }
+  
+  if (clientPollingInterval) {
+    clearInterval(clientPollingInterval);
+    clientPollingInterval = null;
   }
 }
 
@@ -325,11 +352,20 @@ function fetchAdminReservations() {
     .then(response => response.json())
     .then(data => {
       if (data.error) {
-        alert(data.error);
+        // Don't alert on polling requests to avoid spam
+        if (!adminPollingInterval) {
+          alert(data.error);
+        }
         return;
       }
 
       const tableBody = document.querySelector('#reservations-table tbody');
+      
+      // Store current table state for comparison
+      const oldHTML = tableBody ? tableBody.innerHTML : '';
+      
+      if (!tableBody) return;
+      
       tableBody.innerHTML = '';
 
       data.forEach(reservation => {
@@ -348,22 +384,25 @@ function fetchAdminReservations() {
         tableBody.appendChild(row);
       });
 
-      // Add event listeners to edit and delete buttons
-      document.querySelectorAll('.edit-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
-          const id = this.getAttribute('data-id');
-          editReservation(id);
-        });
-      });
-
-      document.querySelectorAll('.delete-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
-          const id = this.getAttribute('data-id');
-          showConfirmation('Sei sicuro di voler eliminare questa prenotazione?', () => {
-            deleteReservation(id);
+      // Only update event handlers if the content actually changed
+      if (oldHTML !== tableBody.innerHTML) {
+        // Add event listeners to edit and delete buttons
+        document.querySelectorAll('.edit-btn').forEach(btn => {
+          btn.addEventListener('click', function() {
+            const id = this.getAttribute('data-id');
+            editReservation(id);
           });
         });
-      });
+
+        document.querySelectorAll('.delete-btn').forEach(btn => {
+          btn.addEventListener('click', function() {
+            const id = this.getAttribute('data-id');
+            showConfirmation('Sei sicuro di voler eliminare questa prenotazione?', () => {
+              deleteReservation(id);
+            });
+          });
+        });
+      }
     })
     .catch(error => console.error('Error fetching reservations:', error));
 }
@@ -379,6 +418,11 @@ function fetchClientReservations() {
       }
 
       const container = document.getElementById('client-reservations-container');
+      if (!container) return;
+      
+      // Store current container state for comparison
+      const oldHTML = container.innerHTML;
+      
       container.innerHTML = '';
 
       if (data.length === 0) {
@@ -403,15 +447,18 @@ function fetchClientReservations() {
         container.appendChild(card);
       });
 
-      // Add event listeners to delete buttons
-      document.querySelectorAll('#client-reservations-container .delete-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
-          const id = this.getAttribute('data-id');
-          showConfirmation('Sei sicuro di voler cancellare questa prenotazione?', () => {
-            deleteReservation(id, true);
+      // Only update event handlers if the content actually changed
+      if (oldHTML !== container.innerHTML) {
+        // Add event listeners to delete buttons
+        document.querySelectorAll('#client-reservations-container .delete-btn').forEach(btn => {
+          btn.addEventListener('click', function() {
+            const id = this.getAttribute('data-id');
+            showConfirmation('Sei sicuro di voler cancellare questa prenotazione?', () => {
+              deleteReservation(id, true);
+            });
           });
         });
-      });
+      }
     })
     .catch(error => console.error('Error fetching user reservations:', error));
 }
@@ -555,6 +602,9 @@ function setupLogout() {
 
 // Separate logout handler function to avoid creating new function references
 function logoutHandler() {
+  // Clear polling intervals on logout
+  clearPollingIntervals();
+  
   fetch('api.php?action=logout')
     .then(response => response.json())
     .then(data => {
@@ -1540,3 +1590,7 @@ document.addEventListener('DOMContentLoaded', () => {
   
   // ...existing initialization code...
 });
+
+// Clean up polling when window is closed or page is changed
+window.addEventListener('beforeunload', clearPollingIntervals);
+window.addEventListener('pagehide', clearPollingIntervals);
