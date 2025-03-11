@@ -1250,7 +1250,7 @@ footer iframe.map {
   margin: 0 auto;
 }
 
-@media (max-width: 52rem) {
+@media (max-width: 55rem) {
   #client-area {
     width: 100%;
   }
